@@ -1597,7 +1597,7 @@ function renderMeeting(){
       el("div",{class:"spread"},el("span",{}),el("div",{class:"row"},m.busy?el("button",{class:"btn text",type:"button",onclick:()=>ctl?.abort()},"Stop"):null,
           el("button",{class:"btn primary",type:"button",disabled:m.busy||!sample,onclick:extract},m.busy?"Reading…":"Find action items"))),
       m.note?el("p",{class:"small muted"},m.note):null,
-      sample?null:el("p",{class:"small",style:"color:var(--warn)"},"Finding action items automatically needs an Anthropic API key in Vercel (Settings → Environment Variables → ANTHROPIC_API_KEY). Until then, assign items from the Directors page.")),
+      null),
     sorted.length?el("div",{style:"display:grid;gap:10px"},
       el("div",{class:"spread"},el("h2",{},`Review ${sorted.length} item${sorted.length>1?"s":""}`),sorted.length>1?el("button",{class:"btn",type:"button",onclick:approveAll},"Approve all"):null),
       el("p",{class:"small muted"},"Check the owner and date against the quote, then approve. Only approved items reach a director."),
