@@ -18,7 +18,14 @@ export default wrap(async (req, res) => {
       // Directors may only rename themselves on their own lane document, never change their role.
       if (write && seg[0] === "lanes" && seg.length === 2 && !lead) {
         if (o.op !== "update") { out.push({ error: "invalid_argument" }); continue; }
-        o.data = { name: String(o.data?.name || "").slice(0, 60) };
+        // Directors may rename themselves and dress up their Duggy; nothing else on the lane document.
+        const next = {};
+        if (typeof o.data?.name === "string" && o.data.name.trim()) next.name = o.data.name.trim().slice(0, 60);
+        if (o.data?.duggy && typeof o.data.duggy === "object") {
+          const ok = (v) => (typeof v === "string" && /^[a-z]{0,12}$/.test(v) ? v : "");
+          next.duggy = { specs: ok(o.data.duggy.specs), hat: ok(o.data.duggy.hat), hold: ok(o.data.duggy.hold) };
+        }
+        o.data = next;
       }
       if (o.op === "get") out.push({ data: await readDoc(o.path) });
       else if (o.op === "list") out.push({ docs: await listCol(o.path) });
@@ -26,9 +33,12 @@ export default wrap(async (req, res) => {
       else if (o.op === "update") {
         const cur = await readDoc(o.path);
         if (!cur) { out.push({ error: "invalid_argument" }); continue; }
-        await writeDoc(o.path, { ...cur, ...(o.data || {}) }); out.push({ ok: true });
+        const next = { ...cur, ...(o.data || {}) };
+        await writeDoc(o.path, next); out.push({ ok: true });
       }
-      else if (o.op === "delete") { await deleteDoc(o.path); out.push({ ok: true }); }
+      else if (o.op === "delete") {
+        await deleteDoc(o.path); out.push({ ok: true });
+      }
       else if (o.op === "add") {
         const id = (o.id && /^[A-Za-z0-9_-]{6,40}$/.test(o.id)) ? o.id : Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
         await writeDoc(`${o.path}/${id}`, o.data || {}); out.push({ ok: true, id });
