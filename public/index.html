@@ -1015,9 +1015,9 @@ function calendarCard(){
     calErr?el("p",{class:"err"},calErr):!CALINFO?el("p",{class:"small muted"},"Loading your link…"):el("div",{style:"display:grid;gap:10px"},
       el("div",{},el("a",{class:"btn primary",href:gcal,target:"_blank",rel:"noopener",onclick:()=>store("calDone","1")},"Add to Google Calendar")),
       el("p",{class:"small muted"},"Google checks for changes every few hours, so a brand-new task can take a little while to appear. For an instant add, use the calendar button on the task itself."),
-      el("details",{},el("summary",{class:"small muted",style:"cursor:pointer"},"Using Apple Calendar or Outlook?"),
+      el("details",{open:true},el("summary",{class:"small muted",style:"cursor:pointer"},"Didn't work, or using Apple Calendar or Outlook?"),
         el("div",{style:"display:grid;gap:8px;margin-top:8px"},
-          el("p",{class:"small muted"},"Subscribe to this link from your calendar app. Keep it private, since anyone with it can see your deadlines."),
+          el("p",{class:"small muted"},"Copy this link. In Google Calendar open ",el("a",{href:GADD,target:"_blank",rel:"noopener"},"Other calendars → From URL"),", paste it and click Add calendar. Apple Calendar and Outlook have a similar Subscribe option. Keep the link private, since anyone with it can see your deadlines."),
           el("input",{id:"calUrl",readonly:true,value:CALINFO.url,onfocus:e=>e.target.select()}),
           el("div",{class:"row"},el("button",{class:"btn",type:"button",onclick:async()=>{try{await navigator.clipboard.writeText(CALINFO.url);note.textContent="Copied."}catch(e){$("calUrl").select();note.textContent="Press Cmd+C to copy."}}},"Copy link"),note,reset)))));
 }
@@ -1799,7 +1799,8 @@ function renderSide(){
         el("button",{class:"x",type:"button","aria-label":"Delete to-do",onclick:()=>db.doc("lanes/_leads/items/"+t.id).delete().catch(writeFail)},"✕"))});
     const inp=el("input",{id:"ltAdd",placeholder:"Add a to-do","aria-label":"Add a to-do",onkeydown:async e=>{if(e.key!=="Enter")return;const v=e.target.value.trim();if(!v)return;e.target.value="";
       try{await db.collection("lanes/_leads/items").add({title:v,due:"",done:false,by:uid,createdAt:new Date().toISOString()})}catch(err){writeFail(err)}}});
-    box.replaceChildren(el("div",{class:"sk"},"My to-dos",el("b",{},`${open} left`)),...rows,el("label",{class:"tdadd"},el("span",{style:"color:#fff;font-size:17px"},"+"),inp));
+    box.replaceChildren(el("div",{class:"sk"},"My to-dos",el("b",{},`${open} left`)),...rows,el("label",{class:"tdadd"},el("span",{style:"color:#fff;font-size:17px"},"+"),inp),
+      el("button",{class:"synced",type:"button",style:"margin-top:8px",onclick:()=>{view={...view,settings:true};render();setTimeout(()=>$("calCard")?.scrollIntoView({block:"center"}),50)}},store("calDone")==="1"?"✓ Synced to Google Calendar":"＋ Add all deadlines to Google Calendar"));
   }else{
     const op=(items[uid]||[]).filter(i=>i.status!=="done");
     const rows=[];
@@ -1839,11 +1840,11 @@ const TAB_ICONS={home:'<svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0
   inbox:'<svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>',me:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
   users:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-4-6"/></svg>',
   bolt:'<svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>',check:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12l3 3 5-6"/></svg>'};
-function inboxItems(){
+function inboxItems(lu=uid){
   const out=[];
-  for(const it of items[uid]||[])(it.updates||[]).forEach(u=>{if(u.side==="lead"&&(u.text||u.kudos))out.push({at:u.at,by:u.by,text:u.text,kudos:u.kudos,task:it.title,it})});
-  for(const it of items[uid]||[])if(it.createdBy&&it.createdBy!==uid&&it.source!=="self"&&it.createdAt)out.push({at:it.createdAt,by:it.createdBy,assigned:true,task:it.title,it});
-  for(const m of MSGS[uid]||[])if(m.side==="lead")out.push({at:m.at,by:m.by,text:m.text,task:null});
+  for(const it of items[lu]||[])(it.updates||[]).forEach(u=>{if(u.side==="lead"&&(u.text||u.kudos))out.push({at:u.at,by:u.by,text:u.text,kudos:u.kudos,task:it.title,it})});
+  for(const it of items[lu]||[])if(it.createdBy&&it.createdBy!==lu&&it.source!=="self"&&it.createdAt)out.push({at:it.createdAt,by:it.createdBy,assigned:true,task:it.title,it});
+  for(const m of MSGS[lu]||[])if(m.side==="lead")out.push({at:m.at,by:m.by,text:m.text,task:null});
   return out.sort((a,b)=>b.at.localeCompare(a.at));
 }
 function renderTabbar(){
@@ -1886,10 +1887,24 @@ function momentumPanel(list,w){
     el("div",{class:"x-mom"},cols),
     el("div",{class:"x-load"},el("span",{},"Workload"),el("div",{class:"tr"},el("i",{style:`width:${Math.max(4,w.load)}%`})),el("b",{},loadLabel(w.load))));
 }
-function fromLeadership(full){
-  const xs=inboxItems().slice(0,full?30:3);
-  const inp=el("input",{id:"msgBox",placeholder:"Message Liz or Rishi…","aria-label":"Message leadership"});
-  const send=async()=>{const v=inp.value.trim();if(!v){inp.focus();return}try{await db.collection(`lanes/${uid}/msgs`).add({text:v.slice(0,800),side:"dir",by:uid,at:new Date().toISOString()});inp.value="";toast("Sent to leadership")}catch(e){writeFail(e)}};
+const GADD="https://calendar.google.com/calendar/u/0/r/settings/addbyurl";
+function calGoogleUrl(){return CALINFO?"https://calendar.google.com/calendar/render?cid="+encodeURIComponent(CALINFO.webcal):"#"}
+function calMini(){
+  if(!CALINFO&&!calErr){API.call("/api/calendar-link").then(j=>{CALINFO=j;render()}).catch(e=>{calErr=e.message||"Couldn't load your calendar link.";render()})}
+  const done=store("calDone")==="1";
+  const copy=async()=>{try{await navigator.clipboard.writeText(CALINFO.url);toast("Link copied. Paste it into Google Calendar's From URL box.")}catch(e){view.settings=true;render()}};
+  return el("section",{class:"x-panel",style:"gap:10px;padding:14px 16px"},
+    el("div",{class:"row",style:"gap:10px;flex-wrap:nowrap"},el("span",{class:"calic",html:CAL_ICON}),el("b",{style:"flex:1"},"Google Calendar"),done?el("span",{class:"x-pill"},"✓ Added"):null),
+    calErr?el("p",{class:"err small"},calErr):!CALINFO?el("p",{class:"small muted"},"Loading…"):done?
+      el("p",{class:"small muted"},"Your deadlines show up in Google Calendar and update on their own. ",el("a",{href:"#",style:"color:var(--brand-deep);font-weight:700",onclick:e=>{e.preventDefault();store("calDone","0");render()}},"Set up again")):
+      [el("div",{class:"row",style:"gap:8px"},el("a",{class:"x-btn",style:"padding:10px 14px;font-size:14px;text-decoration:none",href:calGoogleUrl(),target:"_blank",rel:"noopener",onclick:()=>{store("calDone","1");setTimeout(render,500)}},"Add to Google"),
+        el("button",{class:"x-btn soft",style:"padding:10px 14px;font-size:14px",type:"button",onclick:copy},"Copy link")),
+       el("p",{class:"small muted"},"Didn't work? Copy the link, open ",el("a",{href:GADD,target:"_blank",rel:"noopener",style:"color:var(--brand-deep);font-weight:700",onclick:()=>store("calDone","1")},"Google Calendar → From URL"),", paste it and click Add calendar.")]);
+}
+function fromLeadership(full,lu=uid){
+  const xs=inboxItems(lu).slice(0,full?30:6);
+  const inp=el("input",{id:"msgBox",placeholder:lu===uid?"Message Liz or Rishi…":`Message ${first(laneName(lu))||"them"}…`,"aria-label":"Message leadership"});
+  const send=async()=>{const v=inp.value.trim();if(!v){inp.focus();return}try{await db.collection(`lanes/${lu}/msgs`).add({text:v.slice(0,800),side:lu===uid?"dir":"lead",by:uid,at:new Date().toISOString()});inp.value="";toast("Sent to leadership")}catch(e){writeFail(e)}};
   inp.addEventListener("keydown",e=>{if(e.key==="Enter")send()});
   return el("section",{class:"x-panel",style:"flex:1"},el("h2",{},"From leadership"),
     xs.length?xs.map(x=>el("div",{class:"x-msg"},el("span",{class:"x-av"+(x.by==="rishi"?" l2":"")},(LEAD_INI[x.by]||initials(leadName(x.by)))),
@@ -1962,11 +1977,11 @@ renderDirector=function(laneUid=uid,role=myLane?.role,preview=false){
       upNext.length?[el("div",{class:"spread x-lbl"},"Up next",el("button",{class:"btn text",type:"button",onclick:()=>{view.mtab="list";render()}},"See all")),el("div",{class:"list"},upNext.map(i=>itemRow(i,laneUid,false)))]:null,
       quoteCard(),el("button",{class:"x-fab plus",type:"button","aria-label":"Add a task",onclick:openAddSheet},"+"));
   }
-  const main=el("div",{class:"x-col"},preview?null:quickAdd(laneUid),firstCard(D.top,laneUid,preview),
+  const main=el("div",{class:"x-col"},quickAdd(laneUid),firstCard(D.top,laneUid,preview),
     D.top&&open.has(D.top.id)?el("div",{class:"list"},itemRow(D.top,laneUid,!!preview)):D.top?el("button",{class:"btn text",type:"button",style:"align-self:flex-start;margin-top:-6px",onclick:()=>{open.add(D.top.id);render()}},"Details, comments and status for this one"):null,
     listBlock("This week",D.week,laneUid,!!preview),listBlock("Coming up",D.later,laneUid,!!preview),doneBlock,
     !D.op.length&&!D.done.length?el("div",{class:"empty"},"No tasks yet. Add your first one above."):null);
-  const side=el("div",{class:"x-col"},quoteCard(),preview?null:fromLeadership(false),momentumPanel(D.list,D.w),preview?null:installNudge());
+  const side=el("div",{class:"x-col"},quoteCard(),fromLeadership(false,laneUid),preview?null:calMini());
   const out=el("div",{class:"x-dgrid"},dirHero(nm,D.w,look,false),main,side);
   if(!preview)return out;
   return el("div",{style:"display:grid;gap:14px"},el("div",{class:"previewbar"},el("span",{},`This is what ${personFor(role)||"the "+short(role)+" director"} sees.`),el("button",{class:"btn",type:"button",onclick:()=>{view.preview=null;render()}},"Exit preview")),out);
