@@ -586,6 +586,48 @@ header.top{display:none!important}
 .x-hscroll .x-day{flex:none;width:128px;background:#fff;box-shadow:var(--card-sh)}
 .x-hscroll .x-day.today{background:var(--deep)}
 
+
+/* meeting notes: one centered column */
+.x-meet{max-width:860px;margin:0 auto;display:grid;gap:16px;width:100%}
+.x-meet>.card{padding:24px 26px}
+.x-meet .drop{min-height:190px;justify-content:center}
+.x-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.x-step{background:#fff;border-radius:18px;box-shadow:var(--card-sh);padding:16px;display:flex;flex-direction:column;gap:6px}
+.x-step b{width:28px;height:28px;border-radius:50%;background:var(--mint);color:var(--deep);display:grid;place-items:center;font:800 14px var(--display)}
+.x-step h4{margin:0;font:800 16px var(--display)}
+.x-step p{font-size:13px;color:var(--muted);line-height:1.45}
+@media (max-width:700px){.x-steps{grid-template-columns:1fr}}
+/* sign-in page */
+body.login .sidebar,body.login .tabbar{display:none!important}
+body.login .app{grid-template-columns:minmax(0,1fr)!important}
+body.login .wrap{padding:0!important;max-width:none!important}
+.lg{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);background:#fff}
+.lg-art{background:var(--deep);color:#fff;padding:48px 56px;display:flex;flex-direction:column;gap:28px;position:relative;overflow:hidden}
+.lg-art::before{content:"";position:absolute;right:-180px;top:-160px;width:520px;height:520px;border-radius:50%;background:rgba(255,255,255,.05)}
+.lg-art::after{content:"";position:absolute;left:-120px;bottom:-200px;width:420px;height:420px;border-radius:50%;background:rgba(155,203,92,.10)}
+.lg-art .wm{font:800 clamp(72px,9vw,128px)/.85 var(--display);letter-spacing:-.06em;position:relative}
+.lg-art h2{font:800 clamp(26px,2.6vw,36px)/1.1 var(--display);letter-spacing:-.02em;max-width:460px;position:relative;margin:0;color:#fff}
+.lg-feats{display:grid;gap:14px;position:relative;max-width:440px}
+.lg-feat{display:flex;gap:14px;align-items:flex-start}
+.lg-feat i{width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.1);display:grid;place-items:center;font-style:normal;font-size:17px;flex:none}
+.lg-feat b{display:block;font-size:15px}
+.lg-feat span{font-size:14px;color:#D6E6C4;line-height:1.4}
+.lg-crew{margin-top:auto;display:flex;align-items:flex-end;gap:4px;position:relative}
+.lg-foot{display:flex;align-items:center;gap:10px;font-size:13px;color:#D6E6C4;position:relative}
+.lg-form{display:grid;place-items:center;padding:40px 28px;background:var(--bg2)}
+.lg-card{width:min(400px,100%);display:grid;gap:16px}
+.lg-card .k{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--brand-deep)}
+.lg-card h1{font:800 40px/1.02 var(--display);letter-spacing:-.03em;margin:4px 0 0}
+.lg-card .sub{color:var(--muted);font-size:15px}
+.lg-card label{display:grid;gap:6px;font-size:14px;font-weight:600}
+.lg-card input{padding:14px 16px;border-radius:14px;border:1.5px solid #DCE4D2;background:#fff;font-size:16px}
+.lg-card input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px rgba(114,163,53,.18)}
+.lg-pw{position:relative}
+.lg-pw button{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--brand-deep);font-weight:700;font-size:13px;padding:8px}
+.lg-go{border:0;background:var(--deep);color:#fff;border-radius:14px;padding:15px;font:700 16px var(--body);margin-top:4px}
+.lg-go:disabled{opacity:.7}
+.lg-help{font-size:13px;color:var(--muted);text-align:center}
+@media (max-width:860px){.lg{grid-template-columns:1fr}.lg-art{padding:32px 24px 28px;gap:18px}.lg-art .wm{font-size:76px}.lg-feats,.lg-crew{display:none}.lg-form{padding:28px 20px 40px;place-items:start center}.lg-card h1{font-size:32px}}
 @media (max-width:1200px){.x-dirs{grid-template-columns:repeat(2,minmax(0,1fr))}.x-week{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media (max-width:900px){
   .nav,.sidex,.globe,.sthought{display:none!important}
@@ -2114,12 +2156,47 @@ itemRow=function(it,laneUid,lead){
   }
   return r;
 };
-/* login with the new look */
-const _showLogin=showLogin;
-showLogin=function(){_showLogin();authed=false;
-  const g=document.querySelector("#main .gate");if(g){g.style.cssText="max-width:420px;margin:6vh auto 0;display:grid;gap:14px";
-    g.prepend(el("section",{class:"x-hero",style:"padding:26px;gap:6px;background:var(--deep);color:#fff"},el("span",{class:"wordmark",style:"font-size:64px"},"loop"),el("p",{style:"color:#D6E6C4;font-size:15px"},"180 Degrees Consulting · Purdue. Your username is your first name.")))}
-  $("lgUser")?.focus();};
+/* sign-in page */
+showLogin=function(){
+  authed=false;document.body.classList.add("login");
+  let busy=false;
+  const err=el("p",{class:"err",hidden:true});
+  const go=el("button",{class:"lg-go",type:"submit"},"Sign in");
+  const pw=el("input",{id:"lgPass",type:"password",autocomplete:"current-password",required:true,placeholder:"Your password"});
+  const form=el("form",{class:"lg-card",onsubmit:async e=>{e.preventDefault();if(busy)return;busy=true;err.hidden=true;go.disabled=true;go.textContent="Signing in…";
+      try{await API.call("/api/login",{username:$("lgUser").value,password:pw.value});location.reload()}
+      catch(x){err.textContent=x.message||"Couldn't sign in. Try again.";err.hidden=false;busy=false;go.disabled=false;go.textContent="Sign in";pw.select()}}},
+    el("div",{},el("div",{class:"k"},"Exec board"),el("h1",{},"Welcome back"),el("p",{class:"sub",style:"margin-top:8px"},"Sign in to see what's on your list this week.")),
+    el("label",{},"Username",el("input",{id:"lgUser",autocomplete:"username",autocapitalize:"none",spellcheck:false,required:true,placeholder:"First name"})),
+    el("label",{},"Password",el("span",{class:"lg-pw"},pw,el("button",{type:"button",onclick:e=>{pw.type=pw.type==="password"?"text":"password";e.target.textContent=pw.type==="password"?"Show":"Hide"}},"Show"))),
+    err,go,el("p",{class:"lg-help"},"Forgot your password? Ask Rishi or Liz to reset it."));
+  const feat=(i,t,s)=>el("div",{class:"lg-feat"},el("i",{html:i}),el("div",{},el("b",{},t),el("span",{},s)));
+  const crew=[["happy",{specs:"round",hold:"coffee"}],["thriving",{hat:"cap",hold:"laptop"}],["calm",{specs:"shades",hold:"boba"}],["happy",{hat:"beanie",hold:"clipboard"}]];
+  const art=el("section",{class:"lg-art"},
+    el("div",{class:"wm"},"loop"),
+    el("h2",{},"Every deliverable on the exec board, in one place."),
+    el("div",{class:"lg-feats"},feat(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg>`,"Your list, sorted for you","See what to do first, what's due this week and what's coming up."),
+      feat(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>`,"Stay in the loop with leadership","Comments, kudos and new tasks from Liz and Rishi land right on your page."),
+      feat(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>`,"Synced to Google Calendar","Deadlines show up in your calendar and update on their own.")),
+    el("div",{class:"lg-crew","aria-hidden":"true"},crew.map(([m,l],i)=>el("span",{html:petSVG(m,i===1?104:84,"",l),style:"line-height:0"}))),
+    el("div",{class:"lg-foot",html:'<svg width="22" height="22" viewBox="0 0 64 64" aria-hidden="true"><defs><clipPath id="lgg"><circle cx="32" cy="32" r="26"/></clipPath></defs><circle cx="32" cy="32" r="26" fill="#72A335"/><g clip-path="url(#lgg)" fill="#2F5410"><path d="M0 22 Q32 6 64 26 L64 31 Q32 13 0 28Z"/><path d="M0 36 Q32 20 64 40 L64 46 Q32 27 0 42Z"/><path d="M0 50 Q32 35 64 55 L64 62 Q32 42 0 57Z"/></g></svg>'},"180 Degrees Consulting · Purdue"));
+  $("main").replaceChildren(el("div",{class:"lg"},art,el("section",{class:"lg-form"},form)));
+  $("bandact")?.replaceChildren();$("nav").replaceChildren();$("mechip").replaceChildren();$("main").style.visibility="";
+  $("lgUser").focus();
+};
+/* meeting notes: centered upload with how-it-works below */
+const _renderMeeting=renderMeeting;
+renderMeeting=function(){
+  const out=_renderMeeting();out.className="x-meet";
+  const last=out.lastElementChild;
+  if(last&&last.classList.contains("mini")){
+    last.replaceWith(el("div",{class:"x-steps"},
+      el("div",{class:"x-step"},el("b",{},"1"),el("h4",{},"Add your notes"),el("p",{},"Drop a transcript from Wispr, Meet or Otter, or paste the text. Give the meeting a name and date.")),
+      el("div",{class:"x-step"},el("b",{},"2"),el("h4",{},"Claude finds action items"),el("p",{},"Each item gets an owner, a due date and the quote it came from, so you can check it.")),
+      el("div",{class:"x-step"},el("b",{},"3"),el("h4",{},"Approve and send"),el("p",{},"Items show up here for review. Approve one and it lands on that director's list."))));
+  }
+  return out;
+};
 /* main render */
 renderInner=function(){
   if(!db)return;

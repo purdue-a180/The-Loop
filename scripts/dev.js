@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
-const types = { ".html": "text/html; charset=utf-8", ".png": "image/png", ".js": "text/javascript" };
+const types = { ".html": "text/html; charset=utf-8", ".png": "image/png", ".js": "text/javascript", ".webmanifest": "application/manifest+json" };
 http.createServer(async (req, res) => {
   const url = new URL(req.url, "http://x");
   if (url.pathname.startsWith("/api/")) {
