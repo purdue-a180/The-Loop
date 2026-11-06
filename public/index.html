@@ -643,7 +643,8 @@ body.login .wrap{padding:0!important;max-width:none!important}
 @media (max-width:1200px){.x-dirs{grid-template-columns:repeat(2,minmax(0,1fr))}.x-week{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media (max-width:900px){
   .nav,.sidex,.globe,.sthought{display:none!important}
-  .sidebar{overflow:visible!important;z-index:60!important}
+  .sidebar{overflow:visible!important;z-index:60!important;padding-top:calc(10px + env(safe-area-inset-top,0px))!important}
+  body::before{display:none}
   .memenu{position:fixed!important;top:calc(64px + env(safe-area-inset-top,0px))!important;right:12px!important;left:auto!important;bottom:auto!important;z-index:80!important;width:230px!important}
   .sidebar{flex-wrap:nowrap!important;align-items:center!important}
   .app{align-content:start;grid-template-rows:auto 1fr}
@@ -1970,7 +1971,7 @@ function fromLeadership(full,lu=uid){
 }
 function firstTask(op){const att=op.filter(i=>isOverdue(i)||i.status==="blocked");return att[0]||op.filter(i=>i.due).sort((a,b)=>a.due.localeCompare(b.due))[0]||op[0]||null}
 function firstCard(it,laneUid,preview){
-  if(!it)return el("section",{class:"x-first"},el("div",{},el("div",{class:"k"},"All clear"),el("h3",{},"Nothing urgent right now"),el("p",{},"Add a task above, or enjoy the breathing room.")));
+  if(!it)return el("section",{class:"x-first"},el("div",{},el("div",{class:"k"},"All clear"),el("h3",{},"Nothing urgent right now"),el("p",{},isMobile()?"Tap + to add a task, or enjoy the breathing room.":"Add a task above, or enjoy the breathing room.")));
   const d=daysUntil(it.due);const meta=[it.due?(d<0?`Was due ${new Date(it.due+"T00:00:00").toLocaleDateString(undefined,{weekday:"long"})}`:d===0?"Due today":d===1?"Due tomorrow":`Due ${fmtDate(it.due)}`):"No due date",
     it.status==="blocked"?"blocked":null,it.source!=="self"&&it.createdBy?`from ${leadName(it.createdBy)}`:null,it.detail?`note: “${it.detail.slice(0,70)}”`:null].filter(Boolean).join(" · ");
   return el("section",{class:"x-first"},el("div",{style:"min-width:0"},el("div",{class:"k"},"Do this first"),el("h3",{},it.title),el("p",{},meta)),
