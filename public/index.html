@@ -449,7 +449,7 @@ header.top{display:none!important}
 .x-k{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--brand-deep)}
 .x-hero{background:#fff;border-radius:26px;box-shadow:var(--card-sh);padding:28px 32px;display:flex;flex-direction:column;gap:20px}
 .x-hrow{display:flex;justify-content:space-between;align-items:center;gap:24px}
-.x-hero h1{font:800 clamp(32px,3.3vw,46px)/1 var(--display);letter-spacing:-.03em;margin:6px 0 0}
+.x-hero h1{font:800 46px/1 var(--display);letter-spacing:-.03em;margin:6px 0 0}
 .x-hero .lede{font-size:17px;color:var(--muted);margin-top:8px}
 .x-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .x-chip{background:var(--bg2);font-size:14px;font-weight:600;padding:6px 12px;border-radius:99px;white-space:nowrap}
@@ -471,13 +471,13 @@ header.top{display:none!important}
 .x-bell svg{width:20px;height:20px;fill:none;stroke:var(--ink);stroke-width:2}
 .x-bell i{position:absolute;top:-6px;right:-6px;background:var(--bad);color:#fff;font:800 10px/17px var(--body);min-width:17px;border-radius:99px;font-style:normal;text-align:center;padding:0 4px}
 .x-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}
-.x-day{border-radius:16px;padding:12px;background:var(--bg2);display:flex;flex-direction:column;gap:6px;min-height:118px;min-width:0}
+.x-day{border-radius:16px;padding:12px;background:var(--bg2);display:flex;flex-direction:column;gap:6px;min-height:92px;min-width:0}
 .x-day.today{background:var(--deep);color:#fff}
 .x-day .dl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .x-day.today .dl{color:#D6E6C4}
 .x-day .dl b{font:800 17px var(--display);letter-spacing:0;color:var(--ink);margin-left:4px}
 .x-day.today .dl b{color:#fff}
-.x-day .ev{all:unset;cursor:pointer;font-size:12px;line-height:1.3;background:#fff;border-radius:8px;padding:6px 8px;overflow:hidden;text-overflow:ellipsis;display:block;white-space:nowrap;flex:none;line-height:1.3}
+.x-day .ev{all:unset;cursor:pointer;font-size:12px;line-height:1.3;background:#fff;border-radius:8px;padding:5px 7px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;max-height:2.6em;flex:none}
 .x-day.today .ev{background:rgba(255,255,255,.12)}
 .x-day .free{font-size:12px;color:var(--faint)}
 .x-day.today .free{color:#D6E6C4}
@@ -586,28 +586,7 @@ header.top{display:none!important}
 .x-hscroll .x-day{flex:none;width:128px;background:#fff;box-shadow:var(--card-sh)}
 .x-hscroll .x-day.today{background:var(--deep)}
 
-/* compact leadership home so it fits one laptop screen */
-@media (min-width:901px){
-.wrap{padding:18px 24px 20px!important}
-.x-page{gap:14px}
-.x-hero{padding:20px 26px;gap:12px;border-radius:22px}
-.x-hero h1{font-size:clamp(30px,2.8vw,40px)}
-.x-hero .lede{font-size:15px;margin-top:4px}
-.x-stats{padding-top:12px}
-.x-stat b{font-size:28px}
-.x-day{min-height:76px;padding:10px 12px;gap:6px}
-.x-day .ev b{-webkit-line-clamp:1!important}
-.x-dfoot{display:none}
-.x-dcard{gap:9px}
-.x-lgrid{gap:16px}
-.x-lgrid .x-col{gap:10px}
-.x-dirs{gap:12px}
-.x-dcard{padding:13px 14px;gap:8px}
-.x-drows{padding-top:8px;gap:5px}
-.x-panel{padding:16px}
-.x-h2{font-size:20px}
-}
-@media (max-width:1200px){.x-dirs{grid-template-columns:repeat(2,minmax(0,1fr))}.x-week{gap:6px}.x-day{padding:10px 8px}}
+@media (max-width:1200px){.x-dirs{grid-template-columns:repeat(2,minmax(0,1fr))}.x-week{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media (max-width:900px){
   .nav,.sidex,.globe,.sthought{display:none!important}
   .sidebar{flex-wrap:nowrap!important;align-items:center!important}
@@ -2019,8 +1998,8 @@ function weekStrip(all,scroll){
   const op=all.filter(i=>i.status!=="done"&&!i._pending);
   const days=[];
   for(let n=0;n<7;n++){const iso=plusDays(n),dt=new Date(iso+"T00:00:00");const its=op.filter(i=>i.due===iso);
-    days.push(el("div",{class:"x-day"+(n===0?" today":"")+(!its.length&&n?" nodue":"")},el("span",{class:"dl"},n===0?"Today":DOW[dt.getDay()],el("b",{},dt.getDate())),
-      its.length?its.slice(0,3).map(i=>el("button",{class:"ev",type:"button",onclick:()=>{view.drill=lanes[i._lane]?.role;render();window.scrollTo(0,0)}},[el("b",{style:"display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;white-space:normal;font-weight:600;overflow:hidden;line-height:1.3"},i.title),el("span",{style:"opacity:.7"},first(laneName(i._lane))||short(lanes[i._lane]?.role))])):el("span",{class:"free"},"Free"),
+    days.push(el("div",{class:"x-day"+(n===0?" today":"")+""},el("span",{class:"dl"},n===0?"Today":DOW[dt.getDay()],el("b",{},dt.getDate())),
+      its.length?its.slice(0,3).map(i=>el("button",{class:"ev",type:"button",onclick:()=>{view.drill=lanes[i._lane]?.role;render();window.scrollTo(0,0)}},`${i.title} · ${first(laneName(i._lane))||short(lanes[i._lane]?.role)}`)):el("span",{class:"free"},"Free"),
       its.length>3?el("span",{class:"free"},`+${its.length-3} more`):null))}
   return el("div",{class:scroll?"x-hscroll":"x-week"},days);
 }
@@ -2049,7 +2028,7 @@ function leadHero(compact){
   return el("section",{class:"x-hero"},
     el("div",{class:"x-hrow"},el("div",{style:"min-width:0"},el("div",{class:"x-k"},todayKicker()),el("h1",{},`${greetWord()}, ${nm}`),el("p",{class:"lede"},leadLede(all,over))),
       el("div",{class:"x-duggy"},el("div",{class:"x-speech"},el("b",{},"Duggy"),el("span",{class:"m"}," · "+MOOD_LABEL[boardW.mood]),el("br"),petLine(boardW,false)),petButton(boardW.mood,104,myLook()))),
-    el("div",{class:"x-stats"},stat(op.length,"open tasks"),stat(over,"overdue","bad"),stat(quiet,"quiet a week","warn"),stat(doneWeek,"done this week","good"),
+    el("div",{class:"x-stats"},stat(op.length,"open tasks"),stat(over,"overdue","bad"),stat(quiet,quiet===1?"director quiet a week":"directors quiet a week","warn"),stat(doneWeek,"done this week","good"),
       el("div",{style:"display:flex;align-items:center"},bell,el("button",{class:"x-btn",type:"button",onclick:()=>openAssign()},"+ Assign a task"))),
     el("div",{style:"display:flex;flex-direction:column;gap:10px"},el("div",{class:"spread"},el("h2",{class:"x-h2",style:"font-size:18px"},"The next 7 days"),el("span",{class:"small muted"},"Every deadline across the board")),weekStrip(all,false)));
 }
