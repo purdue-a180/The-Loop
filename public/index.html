@@ -616,6 +616,20 @@ body.login .wrap{padding:0!important;max-width:none!important}
 .lg-go:disabled{opacity:.7}
 .lg-help{font-size:13px;color:var(--ink);text-align:center}
 .lg-foot{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);font-size:13px;color:var(--deep);white-space:nowrap}
+
+/* desktop: giant loop on top, one-line sign-in bar underneath */
+@media (min-width:861px){
+.lg{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:24px 24px 70px}
+.lg-wm{position:relative;left:auto;top:auto;transform:none}
+.lg-card{width:auto;max-width:none;margin-top:72px!important;grid-template-columns:260px 260px auto;align-items:end;gap:18px 36px;padding:24px 24px 24px 36px;border-radius:999px}
+.lg-card label{gap:2px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lg-card input{font-size:17px;padding:6px 0;border-bottom-width:1.5px}
+.lg-go{margin:0;padding:15px 28px;white-space:nowrap}
+.lg-card .err,.lg-help{grid-column:1/-1}
+.lg-help{position:absolute;left:0;right:0;top:calc(100% + 22px);color:var(--muted)}
+.lg-card .err{position:absolute;left:0;right:0;top:calc(100% + 20px);text-align:center;margin:0}
+.lg-card .err:not([hidden])~.lg-help{display:none}
+}
 @keyframes lgsip{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(5deg) translateY(-3px)}}
 @keyframes lgbreathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.05,.95)}}
 @keyframes lgwobble{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
@@ -2156,7 +2170,7 @@ itemRow=function(it,laneUid,lead){
 /* sign-in page */
 function lgWordmark(){
   const mob=matchMedia("(max-width:860px)").matches;
-  const F=Math.round(mob?Math.min(168,(innerWidth-30)/2.3):Math.min(500,innerWidth*.36,innerHeight*.5));
+  const F=Math.round(mob?Math.min(168,(innerWidth-30)/2.3):Math.min(420,innerWidth*.34,(innerHeight-320)/1.15));
   const S=Math.round(mob?F*.37:F*.3),TL=.792*F,TO=.612*F;
   const L=(ch,mood,look,cls,delay,size,dx,bottom,rot,origin)=>el("span",{class:"ch"},ch,el("span",{class:"dg",style:`bottom:${Math.round(bottom)}px;transform:translateX(calc(-50% + ${Math.round(dx)}px)) rotate(${rot}deg);transform-origin:${origin}`,
     html:petSVG(mood,size,"lg-"+cls,look).replace('<svg ',`<svg style="animation-delay:${delay}s" `)}));
@@ -2180,8 +2194,8 @@ showLogin=function(){
     el("label",{},"Password",el("span",{class:"lg-pw"},pw,el("button",{type:"button",onclick:e=>{pw.type=pw.type==="password"?"text":"password";e.target.textContent=pw.type==="password"?"Show":"Hide"}},"Show"))),
     err,go,el("p",{class:"lg-help"},"Forgot your password? Ask Rishi or Liz."));
   const build=()=>{const {wm,F,mob}=lgWordmark();
-    if(mob)form.style.marginTop=Math.round(F*.26)+"px";
-    else requestAnimationFrame(()=>{const h=form.offsetHeight||420;form.style.marginTop=Math.max(40,Math.round(h-.584*F+76))+"px"});
+    form.style.marginTop=mob?Math.round(F*.26)+"px":"";
+    if(!mob)wm.style.marginTop=Math.round(F*.32)+"px";
     return wm};
   const page=el("div",{class:"lg"},build(),form,el("span",{class:"lg-foot"},"180 Degrees Consulting · Purdue"));
   $("main").replaceChildren(page);
