@@ -602,7 +602,7 @@ body.login .sidebar,body.login .tabbar{display:none!important}
 body.login .app{grid-template-columns:minmax(0,1fr)!important}
 body.login .wrap{padding:0!important;max-width:none!important}
 .lg{min-height:100vh;position:relative;overflow:hidden;background:#E9F2DE;display:grid;place-items:center;padding:24px}
-.lg-wm{position:absolute;left:50%;top:50%;transform:translate(-50%,-44%);font-family:var(--display);font-weight:800;letter-spacing:-.07em;line-height:.8;color:var(--deep);white-space:nowrap;user-select:none}
+.lg-wm{position:absolute;left:50%;top:50%;transform:translate(-50%,-60%);font-family:var(--display);font-weight:800;letter-spacing:-.07em;line-height:.8;color:var(--deep);white-space:nowrap;user-select:none}
 .lg-wm .ch{position:relative;display:inline-block}
 .lg-wm .dg{position:absolute;left:50%;line-height:0}
 .lg-card{position:relative;width:min(380px,100%);box-sizing:border-box;background:rgba(255,255,255,.5);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2);border:1px solid rgba(255,255,255,.7);border-radius:26px;padding:30px 30px 26px;display:grid;gap:20px;box-shadow:0 30px 80px rgba(30,50,10,.25)}
@@ -2156,7 +2156,7 @@ itemRow=function(it,laneUid,lead){
 /* sign-in page */
 function lgWordmark(){
   const mob=matchMedia("(max-width:860px)").matches;
-  const F=Math.round(mob?Math.min(168,(innerWidth-30)/2.3):Math.min(500,innerWidth*.36,innerHeight*.56));
+  const F=Math.round(mob?Math.min(168,(innerWidth-30)/2.3):Math.min(500,innerWidth*.36,innerHeight*.5));
   const S=Math.round(mob?F*.37:F*.3),TL=.792*F,TO=.612*F;
   const L=(ch,mood,look,cls,delay,size,dx,bottom,rot,origin)=>el("span",{class:"ch"},ch,el("span",{class:"dg",style:`bottom:${Math.round(bottom)}px;transform:translateX(calc(-50% + ${Math.round(dx)}px)) rotate(${rot}deg);transform-origin:${origin}`,
     html:petSVG(mood,size,"lg-"+cls,look).replace('<svg ',`<svg style="animation-delay:${delay}s" `)}));
@@ -2179,7 +2179,10 @@ showLogin=function(){
     el("label",{},"Username",el("input",{id:"lgUser",autocomplete:"username",autocapitalize:"none",spellcheck:false,required:true,placeholder:"First name"})),
     el("label",{},"Password",el("span",{class:"lg-pw"},pw,el("button",{type:"button",onclick:e=>{pw.type=pw.type==="password"?"text":"password";e.target.textContent=pw.type==="password"?"Show":"Hide"}},"Show"))),
     err,go,el("p",{class:"lg-help"},"Forgot your password? Ask Rishi or Liz."));
-  const build=()=>{const {wm,F,mob}=lgWordmark();form.style.marginTop=mob?Math.round(F*.26)+"px":Math.round(F*.3)+"px";return wm};
+  const build=()=>{const {wm,F,mob}=lgWordmark();
+    if(mob)form.style.marginTop=Math.round(F*.26)+"px";
+    else requestAnimationFrame(()=>{const h=form.offsetHeight||420;form.style.marginTop=Math.max(40,Math.round(h-.584*F+76))+"px"});
+    return wm};
   const page=el("div",{class:"lg"},build(),form,el("span",{class:"lg-foot"},"180 Degrees Consulting · Purdue"));
   $("main").replaceChildren(page);
   let rt;window.addEventListener("resize",()=>{if(!document.body.classList.contains("login"))return;clearTimeout(rt);rt=setTimeout(()=>{const old=page.querySelector(".lg-wm");if(old)old.replaceWith(build())},120)});
