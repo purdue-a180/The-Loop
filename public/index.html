@@ -643,6 +643,8 @@ body.login .wrap{padding:0!important;max-width:none!important}
 @media (max-width:1200px){.x-dirs{grid-template-columns:repeat(2,minmax(0,1fr))}.x-week{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media (max-width:900px){
   .nav,.sidex,.globe,.sthought{display:none!important}
+  .sidebar{overflow:visible!important;z-index:60!important}
+  .memenu{position:fixed!important;top:calc(64px + env(safe-area-inset-top,0px))!important;right:12px!important;left:auto!important;bottom:auto!important;z-index:80!important;width:230px!important}
   .sidebar{flex-wrap:nowrap!important;align-items:center!important}
   .app{align-content:start;grid-template-rows:auto 1fr}
   .brandmark{padding:0!important}
