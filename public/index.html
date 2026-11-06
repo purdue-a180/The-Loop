@@ -602,7 +602,7 @@ body.login .sidebar,body.login .tabbar{display:none!important}
 body.login .app{grid-template-columns:minmax(0,1fr)!important}
 body.login .wrap{padding:0!important;max-width:none!important}
 .lg{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);background:#fff}
-.lg-art{background:var(--deep);color:#fff;padding:48px 56px;display:flex;flex-direction:column;gap:28px;position:relative;overflow:hidden}
+.lg-art{background:var(--deep);color:#fff;padding:48px 56px;display:flex;flex-direction:column;justify-content:center;gap:28px;position:relative;overflow:hidden}
 .lg-art::before{content:"";position:absolute;right:-180px;top:-160px;width:520px;height:520px;border-radius:50%;background:rgba(255,255,255,.05)}
 .lg-art::after{content:"";position:absolute;left:-120px;bottom:-200px;width:420px;height:420px;border-radius:50%;background:rgba(155,203,92,.10)}
 .lg-art .wm{font:800 clamp(72px,9vw,128px)/.85 var(--display);letter-spacing:-.06em;position:relative}
@@ -612,8 +612,9 @@ body.login .wrap{padding:0!important;max-width:none!important}
 .lg-feat i{width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.1);display:grid;place-items:center;font-style:normal;font-size:17px;flex:none}
 .lg-feat b{display:block;font-size:15px}
 .lg-feat span{font-size:14px;color:#D6E6C4;line-height:1.4}
-.lg-crew{margin-top:auto;display:flex;align-items:flex-end;gap:4px;position:relative}
-.lg-foot{display:flex;align-items:center;gap:10px;font-size:13px;color:#D6E6C4;position:relative}
+.lg-crew{display:flex;align-items:flex-end;gap:4px;position:absolute;left:50px;bottom:78px}
+@media (max-height:780px){.lg-crew{display:none!important}}
+.lg-foot{display:flex;align-items:center;gap:10px;font-size:13px;color:#D6E6C4;position:absolute;left:56px;bottom:40px}
 .lg-form{display:grid;place-items:center;padding:40px 28px;background:var(--bg2)}
 .lg-card{width:min(400px,100%);display:grid;gap:16px}
 .lg-card .k{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--brand-deep)}
@@ -627,7 +628,7 @@ body.login .wrap{padding:0!important;max-width:none!important}
 .lg-go{border:0;background:var(--deep);color:#fff;border-radius:14px;padding:15px;font:700 16px var(--body);margin-top:4px}
 .lg-go:disabled{opacity:.7}
 .lg-help{font-size:13px;color:var(--muted);text-align:center}
-@media (max-width:860px){.lg{grid-template-columns:1fr}.lg-art{padding:32px 24px 28px;gap:18px}.lg-art .wm{font-size:76px}.lg-feats,.lg-crew{display:none}.lg-form{padding:28px 20px 40px;place-items:start center}.lg-card h1{font-size:32px}}
+@media (max-width:860px){.lg{grid-template-columns:1fr}.lg-art{padding:32px 24px 28px;gap:18px;justify-content:flex-start}.lg-foot{position:relative;left:auto;bottom:auto}.lg-art .wm{font-size:76px}.lg-feats,.lg-crew{display:none}.lg-form{padding:28px 20px 40px;place-items:start center}.lg-card h1{font-size:32px}}
 @media (max-width:1200px){.x-dirs{grid-template-columns:repeat(2,minmax(0,1fr))}.x-week{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media (max-width:900px){
   .nav,.sidex,.globe,.sthought{display:none!important}
@@ -1864,16 +1865,15 @@ setBandActions=function(){
   const go=(patch)=>{view={...view,settings:false,preview:null,assigning:false,feed:false,closet:false,...patch};render();window.scrollTo(0,0)};
   const navs=isLead?[
     navBtn("overview","Home",!view.settings&&view.tab==="overview"&&!view.drill,()=>go({tab:"overview",drill:null})),
-    navBtn("meeting","Meeting notes",!view.settings&&view.tab==="meeting",()=>go({tab:"meeting",drill:null}),queue.length),
-    navBtn("roster","Roles and access",!view.settings&&view.tab==="roster",()=>go({tab:"roster",drill:null}))
+    navBtn("meeting","Meeting notes",!view.settings&&view.tab==="meeting",()=>go({tab:"meeting",drill:null}),queue.length)
   ]:[navBtn("tasks","My tasks",!view.settings,()=>go({}))];
   $("nav").replaceChildren(...navs);
   const menu=document.querySelector("#mechip .memenu");
   if(menu){
     const sIcon='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 14q4 4 8 0M9 9h.01M15 9h.01"/></svg>';
     const extra=[el("button",{type:"button",role:"menuitem",html:sIcon,onclick:e=>{e.stopPropagation();openCloset()}},el("span",{},"Dress up Duggy"))];
-    if(isLead&&isMobile()){extra.push(el("button",{type:"button",role:"menuitem",html:ICONS.meeting,onclick:()=>{view.menu=false;go({tab:"meeting",drill:null})}},el("span",{},`Meeting notes${queue.length?` (${queue.length})`:""}`)),
-      el("button",{type:"button",role:"menuitem",html:ICONS.roster,onclick:()=>{view.menu=false;go({tab:"roster",drill:null})}},el("span",{},"Roles and access")))}
+    if(isLead&&isMobile())extra.push(el("button",{type:"button",role:"menuitem",html:ICONS.meeting,onclick:()=>{view.menu=false;go({tab:"meeting",drill:null})}},el("span",{},`Meeting notes${queue.length?` (${queue.length})`:""}`)));
+    if(isLead)extra.push(el("button",{type:"button",role:"menuitem",html:ICONS.roster,onclick:()=>{view.menu=false;go({tab:"roster",drill:null})}},el("span",{},"Roles and access")));
     menu.children[0].after(...extra);
   }
 };
@@ -2178,7 +2178,7 @@ showLogin=function(){
     el("div",{class:"lg-feats"},feat(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg>`,"Your list, sorted for you","See what to do first, what's due this week and what's coming up."),
       feat(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>`,"Stay in the loop with leadership","Comments, kudos and new tasks from Liz and Rishi land right on your page."),
       feat(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>`,"Synced to Google Calendar","Deadlines show up in your calendar and update on their own.")),
-    el("div",{class:"lg-crew","aria-hidden":"true"},crew.map(([m,l],i)=>el("span",{html:petSVG(m,i===1?104:84,"",l),style:"line-height:0"}))),
+    el("div",{class:"lg-crew","aria-hidden":"true"},crew.map(([m,l],i)=>el("span",{html:petSVG(m,i===1?88:72,"",l),style:"line-height:0"}))),
     el("div",{class:"lg-foot",html:'<svg width="22" height="22" viewBox="0 0 64 64" aria-hidden="true"><defs><clipPath id="lgg"><circle cx="32" cy="32" r="26"/></clipPath></defs><circle cx="32" cy="32" r="26" fill="#72A335"/><g clip-path="url(#lgg)" fill="#2F5410"><path d="M0 22 Q32 6 64 26 L64 31 Q32 13 0 28Z"/><path d="M0 36 Q32 20 64 40 L64 46 Q32 27 0 42Z"/><path d="M0 50 Q32 35 64 55 L64 62 Q32 42 0 57Z"/></g></svg>'},"180 Degrees Consulting · Purdue"));
   $("main").replaceChildren(el("div",{class:"lg"},art,el("section",{class:"lg-form"},form)));
   $("bandact")?.replaceChildren();$("nav").replaceChildren();$("mechip").replaceChildren();$("main").style.visibility="";
