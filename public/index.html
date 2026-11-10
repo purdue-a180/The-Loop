@@ -668,6 +668,9 @@ body.login .wrap{padding:0!important;max-width:none!important}
   .x-cbox{grid-template-columns:1fr}
   .x-stage .st{min-height:200px}
   .pops{bottom:calc(96px + env(safe-area-inset-bottom,0px))!important}
+  .wa{bottom:calc(96px + env(safe-area-inset-bottom,0px))!important;z-index:85!important;width:calc(100% - 24px)!important;max-height:calc(100vh - 140px);overflow:auto}
+  .wa .row{flex-wrap:wrap}
+  .wa .wabtn{flex:1;text-align:center}
 }
 </style>
 
@@ -1104,37 +1107,43 @@ function loginsCard(){
 /* ---------- WhatsApp share ---------- */
 function pick(a){return a[Math.floor(Math.random()*a.length)]}
 function lastComment(it){const u=[...(it.updates||[])].reverse().find(u=>u.side==="dir"&&u.text);return u?u.text.trim():""}
-function draftMessage(kind,it,role){
-  const r=short(role),t0=it.title.replace(/\.$/,""),t=/^[A-Z][a-z]/.test(t0)?t0[0].toLowerCase()+t0.slice(1):t0,c=lastComment(it),d=daysUntil(it.due);
+const VERBS=/^(add|update|send|email|book|finali[sz]e|draft|prepare|prep|create|make|set|schedule|confirm|collect|share|review|write|finish|complete|plan|reach|follow|call|meet|post|design|organi[sz]e|submit|sign|renew|order|contact|check|build|research|run|host|invite|edit|upload|print|order|fix|clean|coordinate|reply|respond|ask|get|find|compile|present)\b/i;
+function taskPhrase(title){
+  const t0=title.trim().replace(/[.!?]+$/,"");
+  const t=/^[A-Z][a-z]/.test(t0)?t0[0].toLowerCase()+t0.slice(1):t0;
+  return VERBS.test(t)?{done:`I just finished the task to ${t}`,started:`I'm going to ${t}`,stuck:`I'm a bit stuck trying to ${t}`}
+    :(n=>({done:`I just finished ${n}`,started:`I'm starting on ${n}`,stuck:`I'm a bit stuck on ${n}`}))(/^(the|a|an|my|our|this|all)\b/i.test(t)?t:"the "+t);
+}
+function draftMessage(kind,it,role,v){
+  const p=taskPhrase(it.title);v=v??0;
   if(kind==="done"){
-    const lead=pick([`Quick ${r} update: just wrapped up ${t} ✅`,`${t} — done ✅`,`Checked off ${t} for ${r} ✅`,`Finished ${t} ✅`]);
-    const tail=c?` ${c}`:d!==null&&d<0?" Took a little longer than planned, but it's done.":d!==null&&d>0?` Done ${d} day${d>1?"s":""} early.`:"";
-    return (lead+(lead.endsWith("✅")?"":"")+(tail?(/[.!?]$/.test(lead)?" ":".")+tail:"")).replace("✅.","✅");
+    const m=[`Hi everyone, ${p.done}.`,`Hey all, quick update: ${p.done}.`,`Hi team, just a heads up that ${p.done.replace(/^I just/,"I've just")}.`];
+    return m[v%m.length];
   }
-  if(kind==="blocked")return `Heads up, I'm stuck on ${t} (${r}). ${c||"Could use a hand or a quick call on this."}`;
-  return `Adding to my ${r} list: ${t}${it.due?`, aiming for ${fmtDate(it.due)}`:""}. Will keep you posted.`;
+  if(kind==="blocked")return `Hi everyone, ${p.stuck}. Would anyone have a few minutes to help me think it through?`;
+  return `Hi everyone, ${p.started} this week. I'll keep you posted.`;
 }
 function shareNudge(kind,it,role){
   if(!role||store("waOff")==="1")return;
   document.getElementById("wa")?.remove();
-  const ta=el("textarea",{id:"waText",rows:"3","aria-label":"Message"},draftMessage(kind,it,role));
+  let ver=0;const ta=el("textarea",{id:"waText",rows:"3","aria-label":"Message, edit before sending"},draftMessage(kind,it,role,0));
   const send=el("a",{class:"btn wabtn",target:"_blank",rel:"noopener",href:"#",onclick:()=>setTimeout(()=>sheet.remove(),400)},"Send on WhatsApp");
   const sync=()=>send.href="https://wa.me/?text="+encodeURIComponent(ta.value);sync();ta.addEventListener("input",sync);
   const copy=el("button",{class:"btn",type:"button",onclick:async()=>{try{await navigator.clipboard.writeText(ta.value);copy.textContent="Copied"}catch(e){ta.select()}}},"Copy");
-  const again=el("button",{class:"btn text",type:"button",onclick:()=>{ta.value=draftMessage(kind,it,role);sync()}},"Another version");
+  const again=el("button",{class:"btn text",type:"button",onclick:()=>{ta.value=draftMessage(kind,it,role,++ver);sync()}},"Another version");
   const ai=sample?el("button",{class:"btn text",type:"button",onclick:async()=>{
       ai.textContent="Writing…";ai.disabled=true;
       try{const name=first(myLane?.name||myProfileName);
         const {text}=await sample(`Write a WhatsApp message that ${name||"a director"}, ${roster[role].title} at 180 Degrees Consulting Purdue, will post in the exec board group chat.
 Event: ${kind==="done"?"they just completed":kind==="blocked"?"they are blocked on":"they just added"} the task "${it.title}"${it.due?` (due ${fmtDate(it.due)})`:""}.${lastComment(it)?` Their latest note: "${lastComment(it)}".`:""}
-Write in first person as them: casual, warm, confident, 1–2 short sentences, at most one emoji. Don't sign off with their name. Reply with only the message.`,{modelTier:"quick",cache:false});
+Write in first person as them, as a short, natural, conversational group message (one or two sentences, friendly but professional). Do not mention their name, title, due dates or notes, do not ask whether anything else is needed, and do not put the task in quotation marks. Do not use any emojis or slang. Reply with only the message.`,{modelTier:"quick",cache:false});
         ta.value=text.trim().replace(/^"|"$/g,"");sync();
       }catch(e){toast(e?.code==="not_granted"?"Claude access was declined":"Couldn't rewrite it right now")}
       ai.textContent="Write it with Claude";ai.disabled=false}},"Write it with Claude"):null;
   const sheet=el("div",{class:"wa",id:"wa",role:"dialog","aria-label":"Share to WhatsApp"},
-    el("div",{class:"spread"},el("strong",{},kind==="done"?"Nice! Tell the exec chat?":kind==="blocked"?"Ask the exec chat for help?":"Let the exec chat know?"),
+    el("div",{class:"spread"},el("strong",{},kind==="done"?"Share this update with the exec chat?":kind==="blocked"?"Ask the exec chat for help?":"Let the exec chat know?"),
       el("button",{class:"btn text",type:"button","aria-label":"Close",onclick:()=>sheet.remove()},"✕")),
-    ta,
+    el("p",{class:"small muted",style:"margin:0"},"Tap the message to edit it before sending."),ta,
     el("div",{class:"row small",style:"gap:12px"},again,ai,
       el("button",{class:"btn text",type:"button",style:"margin-left:auto",onclick:()=>{store("waOff","1");sheet.remove();render();toast("WhatsApp prompts off. Turn them back on below your list.")}},"Don't ask again")),
     el("div",{class:"row",style:"justify-content:flex-end"},copy,send));
@@ -1816,7 +1825,7 @@ function skinSubs(){
   if(!db)return;
   if(isLead){
     if(!skinSubs_.look){skinSubs_.look=1;db.doc("config/duggy_"+uid).onSnapshot(s=>{LEADLOOK=s.exists?s.data():null;render()},()=>{})}
-    if(!skinSubs_.todo){skinSubs_.todo=1;db.collection("lanes/_leads/items").onSnapshot(s=>{LTODO=s.docs.map(d=>({id:d.id,...d.data()}));render()},()=>{})}
+    if(!skinSubs_.todo){skinSubs_.todo=1;db.collection(`todos/${uid}/items`).onSnapshot(s=>{LTODO=s.docs.map(d=>({id:d.id,...d.data()}));render()},()=>{})}
     for(const u of Object.keys(lanes))if(!skinSubs_["m"+u]){skinSubs_["m"+u]=1;db.collection(`lanes/${u}/msgs`).onSnapshot(s=>{MSGS[u]=s.docs.map(d=>({id:d.id,...d.data()}));render()},()=>{})}
   }else if(uid&&!skinSubs_.mine){skinSubs_.mine=1;db.collection(`lanes/${uid}/msgs`).onSnapshot(s=>{MSGS[uid]=s.docs.map(d=>({id:d.id,...d.data()}));render()},()=>{})}
 }
@@ -1850,12 +1859,12 @@ function renderSide(){
     const rows=LTODO.slice().sort((a,b)=>(a.done?1:0)-(b.done?1:0)||(a.due||"9").localeCompare(b.due||"9")).filter(t=>!t.done||daysSince(t.doneAt)<1).slice(0,7).map(t=>{
       const d=daysUntil(t.due);
       return el("div",{class:"td"+(t.done?" done":"")},
-        el("button",{class:"c"+(t.done?" on":""),type:"button","aria-label":t.done?"Mark not done":"Mark done",onclick:()=>db.doc("lanes/_leads/items/"+t.id).update({done:!t.done,doneAt:t.done?null:new Date().toISOString()}).catch(writeFail)},t.done?"✓":""),
+        el("button",{class:"c"+(t.done?" on":""),type:"button","aria-label":t.done?"Mark not done":"Mark done",onclick:()=>db.doc(`todos/${uid}/items/`+t.id).update({done:!t.done,doneAt:t.done?null:new Date().toISOString()}).catch(writeFail)},t.done?"✓":""),
         el("span",{style:"display:flex;flex-direction:column;gap:1px;min-width:0"},el("span",{class:"tt"},t.title),
-          el("span",{class:"tm",style:!t.done&&d!==null&&d<=0?"color:#F3C84B":""},t.done?"Done today":[t.due?(d===0?"Today":d<0?"Overdue":fmtDate(t.due)):"",t.by&&t.by!==uid?"· "+leadName(t.by):""].filter(Boolean).join(" "))),
-        el("button",{class:"x",type:"button","aria-label":"Delete to-do",onclick:()=>db.doc("lanes/_leads/items/"+t.id).delete().catch(writeFail)},"✕"))});
+          el("span",{class:"tm",style:!t.done&&d!==null&&d<=0?"color:#F3C84B":""},t.done?"Done today":[t.due?(d===0?"Today":d<0?"Overdue":fmtDate(t.due)):"",""].filter(Boolean).join(" "))),
+        el("button",{class:"x",type:"button","aria-label":"Delete to-do",onclick:()=>db.doc(`todos/${uid}/items/`+t.id).delete().catch(writeFail)},"✕"))});
     const inp=el("input",{id:"ltAdd",placeholder:"Add a to-do","aria-label":"Add a to-do",onkeydown:async e=>{if(e.key!=="Enter")return;const v=e.target.value.trim();if(!v)return;e.target.value="";
-      try{await db.collection("lanes/_leads/items").add({title:v,due:"",done:false,by:uid,createdAt:new Date().toISOString()})}catch(err){writeFail(err)}}});
+      try{await db.collection(`todos/${uid}/items`).add({title:v,due:"",done:false,by:uid,createdAt:new Date().toISOString()})}catch(err){writeFail(err)}}});
     box.replaceChildren(el("div",{class:"sk"},"My to-dos",el("b",{},`${open} left`)),...rows,el("label",{class:"tdadd"},el("span",{style:"color:#fff;font-size:17px"},"+"),inp),
       el("button",{class:"synced",type:"button",style:"margin-top:8px",onclick:()=>{view={...view,settings:true};render();setTimeout(()=>$("calCard")?.scrollIntoView({block:"center"}),50)}},store("calDone")==="1"?"✓ Synced to Google Calendar":"＋ Add all deadlines to Google Calendar"));
   }else{
@@ -2106,12 +2115,12 @@ function leadHero(compact){
 function leadTodosPanel(){
   const rows=LTODO.slice().sort((a,b)=>(a.done?1:0)-(b.done?1:0)||(a.due||"9").localeCompare(b.due||"9"));
   const inp=el("input",{placeholder:"Add a to-do…","aria-label":"Add a to-do",onkeydown:e=>{if(e.key==="Enter")add()}});
-  const add=async()=>{const v=inp.value.trim();if(!v){inp.focus();return}inp.value="";try{await db.collection("lanes/_leads/items").add({title:v,due:"",done:false,by:uid,createdAt:new Date().toISOString()})}catch(e){writeFail(e)}};
+  const add=async()=>{const v=inp.value.trim();if(!v){inp.focus();return}inp.value="";try{await db.collection(`todos/${uid}/items`).add({title:v,due:"",done:false,by:uid,createdAt:new Date().toISOString()})}catch(e){writeFail(e)}};
   return [el("div",{class:"x-add"},el("span",{class:"p"},"+"),inp,el("button",{class:"x-btn",type:"button",onclick:add},"Add")),
     rows.length?el("div",{class:"list"},rows.map(t=>el("div",{class:"item"+(t.done?" done":"")},el("div",{class:"ihead"},
-      el("button",{class:"check"+(t.done?" on":""),type:"button","aria-pressed":!!t.done,"aria-label":"Done",html:CHECK,onclick:()=>db.doc("lanes/_leads/items/"+t.id).update({done:!t.done,doneAt:t.done?null:new Date().toISOString()}).catch(writeFail)}),
-      el("div",{class:"iopen"},el("div",{class:"ititle"},t.title),el("div",{class:"isub"},t.by===uid?"Added by you":"Added by "+leadName(t.by))),
-      el("button",{class:"trash",type:"button","aria-label":"Delete",html:TRASH,onclick:()=>db.doc("lanes/_leads/items/"+t.id).delete().catch(writeFail)}))))):el("div",{class:"empty"},"Nothing here. Liz and you share this list.")];
+      el("button",{class:"check"+(t.done?" on":""),type:"button","aria-pressed":!!t.done,"aria-label":"Done",html:CHECK,onclick:()=>db.doc(`todos/${uid}/items/`+t.id).update({done:!t.done,doneAt:t.done?null:new Date().toISOString()}).catch(writeFail)}),
+      el("div",{class:"iopen"},el("div",{class:"ititle"},t.title),el("div",{class:"isub"},t.done?"Done":t.due?fmtDate(t.due):"Private to you")),
+      el("button",{class:"trash",type:"button","aria-label":"Delete",html:TRASH,onclick:()=>db.doc(`todos/${uid}/items/`+t.id).delete().catch(writeFail)}))))):el("div",{class:"empty"},"Nothing here yet. Only you can see this list.")];
 }
 renderLead=function(){
   if(view.preview)return renderDirector(uidsForRole(view.preview)[0]||"__none__",view.preview,true);
@@ -2169,6 +2178,22 @@ itemRow=function(it,laneUid,lead){
     r.querySelector(".ibody .row")?.prepend(b);
   }
   return r;
+};
+/* leadership: start the board fresh */
+const _renderRoster=renderRoster;
+renderRoster=function(){
+  const out=_renderRoster();
+  let step=0;
+  const b=el("button",{class:"btn danger",type:"button",onclick:async()=>{
+    if(step===0){step=1;b.textContent="Yes, delete everything";setTimeout(()=>{if(step===1&&b.isConnected){step=0;b.textContent="Delete all tasks and activity"}},5000);return}
+    step=2;b.disabled=true;b.textContent="Deleting…";
+    try{const j=await API.call("/api/reset-board",{confirm:"RESET"});LTODO=[];MSGS={};toast(`Board cleared (${j.deleted} items removed)`);setTimeout(()=>location.reload(),900)}
+    catch(e){toast(e.message||"Couldn't clear the board");step=0;b.disabled=false;b.textContent="Delete all tasks and activity"}}},"Delete all tasks and activity");
+  const box=el("section",{class:"card",style:"display:grid;gap:10px;border:1.5px solid #F2C9C3"},
+    el("h3",{style:"margin:0"},"Start the board fresh"),
+    el("p",{class:"small muted"},"Deletes every task, comment, message, meeting-notes item and to-do for everyone. Accounts, passwords, roles and Duggy outfits stay. This can't be undone."),
+    el("div",{},b));
+  return el("div",{style:"display:grid;gap:16px"},out,box);
 };
 /* sign-in page */
 function lgWordmark(){

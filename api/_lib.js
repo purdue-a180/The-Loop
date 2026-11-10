@@ -118,6 +118,8 @@ export function allowed(user, seg, write) {
   const lead = user.role === "lead";
   if (seg[0] === "config") return write ? lead : true;
   if (seg[0] === "pending" || seg[0] === "queue") return lead;
+  // Each leader's private to-do list: only that leader can read or write it.
+  if (seg[0] === "todos") return lead && seg[1] === user.id;
   if (seg[0] === "lanes") {
     if (seg.length === 1) return lead && !write;
     return lead || seg[1] === user.id;
