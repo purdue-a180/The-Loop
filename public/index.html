@@ -645,7 +645,11 @@ body.login .wrap{padding:0!important;max-width:none!important}
   .nav,.sidex,.globe,.sthought{display:none!important}
   .sidebar{overflow:visible!important;z-index:60!important;padding-top:calc(10px + env(safe-area-inset-top,0px))!important}
   html{background:#2f5410}
-  body::before{display:block!important;content:"";position:fixed;left:0;right:0;top:0;height:env(safe-area-inset-top,0px);background:#2f5410!important;z-index:100;pointer-events:none}
+  body::before{display:block!important;content:"";position:fixed;left:0;right:0;top:0;height:max(2px,env(safe-area-inset-top,0px));background:#2f5410!important;z-index:100;pointer-events:none}
+  body:not(.login){background:#2f5410!important}
+  body:not(.login) .app{background:var(--bg2)}
+  html:has(body.login),body.login{background:#E9F2DE!important}
+  body.login::before{background:#E9F2DE!important}
   .sidebar{background:#2f5410!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
   .memenu{position:fixed!important;top:calc(64px + env(safe-area-inset-top,0px))!important;right:12px!important;left:auto!important;bottom:auto!important;z-index:80!important;width:230px!important}
   .sidebar{flex-wrap:nowrap!important;align-items:center!important}
