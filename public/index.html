@@ -644,7 +644,9 @@ body.login .wrap{padding:0!important;max-width:none!important}
 @media (max-width:900px){
   .nav,.sidex,.globe,.sthought{display:none!important}
   .sidebar{overflow:visible!important;z-index:60!important;padding-top:calc(10px + env(safe-area-inset-top,0px))!important}
-  body::before{display:none}
+  html{background:#2f5410}
+  body::before{display:block!important;content:"";position:fixed;left:0;right:0;top:0;height:env(safe-area-inset-top,0px);background:#2f5410!important;z-index:100;pointer-events:none}
+  .sidebar{background:#2f5410!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
   .memenu{position:fixed!important;top:calc(64px + env(safe-area-inset-top,0px))!important;right:12px!important;left:auto!important;bottom:auto!important;z-index:80!important;width:230px!important}
   .sidebar{flex-wrap:nowrap!important;align-items:center!important}
   .app{align-content:start;grid-template-rows:auto 1fr}
@@ -672,6 +674,7 @@ body.login .wrap{padding:0!important;max-width:none!important}
   .wa .row{flex-wrap:wrap}
   .wa .wabtn{flex:1;text-align:center}
 }
+body:has(#wa) .pops{display:none}
 </style>
 
 </head>
