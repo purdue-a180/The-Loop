@@ -2313,7 +2313,7 @@ renderInner=function(){
   petN=0;skinSubs();
   const kept={};document.querySelectorAll("#main input[id],#main textarea[id]").forEach(x=>{if(x.type!=="file"&&x.type!=="checkbox"&&x.type!=="radio"&&x.value)kept[x.id]=x.value});
   const body=view.settings?pageWrap(isLead?"Leadership":"Settings",ME.user.fullName||"Settings",renderSettingsInner()):isLead?renderLead():renderDirector();
-  $("main").replaceChildren(...[body,view.closet?renderCloset():null].filter(Boolean));
+  $("main").replaceChildren(...[typeof pushNudge==="function"?pushNudge():null,body,view.closet?renderCloset():null].filter(Boolean));
   for(const [k,v] of Object.entries(kept)){const x=$(k);if(x&&!x.value)x.value=v}
   setBandActions();renderSide();renderTabbar();
   document.querySelectorAll("details summary").forEach(s=>{if(openDetails.includes(s.textContent))s.parentElement.open=true});
