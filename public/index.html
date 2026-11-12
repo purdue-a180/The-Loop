@@ -2191,6 +2191,7 @@ renderLead=function(){
       const ks=DIRECTORS.filter(k=>{const s=dirSummary(k);return f==="all"||(f==="late"&&s.w.over)||(f==="quiet"&&(s.w.quiet||s.w.blocked))||(f==="ok"&&!s.w.over&&!s.w.quiet&&!s.w.blocked)});
       const fb=(k,l)=>el("button",{type:"button","aria-pressed":f===k,onclick:()=>{view.mfilter=k;render()}},l);
       return el("div",{class:"x-page",style:"gap:12px"},el("h1",{class:"x-h2",style:"font-size:30px"},"Directors"),el("div",{class:"x-seg"},fb("all","All"),fb("late","Late"),fb("quiet","Quiet"),fb("ok","On track")),
+        el("div",{class:"x-card",style:"overflow:hidden"},mdRow()),
         el("div",{class:"x-card",style:"overflow:hidden"},ks.map(k=>{const s=dirSummary(k);return el("button",{class:"x-mrow",type:"button",onclick:()=>{view.drill=k;render();window.scrollTo(0,0)}},petEl(s.w.mood,40,"",lookForRole(k)),
           el("span",{class:"nm"},el("b",{},first(personFor(k))||expectedName(k)||short(k)),el("span",{},`${ROLE_SHORT[k]||short(k)} · ${s.done}/${s.its.length} done`)),el("span",{class:"x-pill "+s.state[0]},s.state[1]),el("span",{style:"color:var(--faint);font-size:20px"},"›"))})),
         el("button",{class:"x-fab",type:"button",onclick:()=>openAssign()},"+ Assign"));}
@@ -2198,7 +2199,6 @@ renderLead=function(){
     if(t==="check")return el("div",{class:"x-page",style:"gap:12px"},el("div",{class:"spread"},el("h1",{class:"x-h2",style:"font-size:30px"},"My to-dos"),el("b",{style:"color:var(--brand-deep);font-size:13px"},`${LTODO.filter(x=>!x.done).length} left`)),...leadTodosPanel(),quoteCard());
     const nudge=DIRECTORS.map(k=>[k,dirSummary(k)]).filter(([,s])=>s.w.over||s.w.blocked||s.quietDays>=STALE_DAYS);
     return el("div",{class:"x-page",style:"gap:12px"},...leadHero(true),
-      el("div",{class:"x-lbl"},otherLead()==="elisah"?"From MD":"From SVP"),el("div",{class:"x-card",style:"overflow:hidden"},mdRow()),
       el("div",{class:"x-lbl"},"Needs a nudge"),
       nudge.length?el("div",{class:"x-card",style:"overflow:hidden"},nudge.map(([k,s])=>el("button",{class:"x-mrow",type:"button",onclick:()=>{view.drill=k;render();window.scrollTo(0,0)}},petEl(s.w.mood,36,"",lookForRole(k)),
         el("span",{class:"nm"},el("b",{},first(personFor(k))||short(k)),el("span",{},s.rows[0]?s.rows[0][2].title:`No update in ${s.quietDays} days`)),el("span",{class:"x-pill "+s.state[0]},s.state[1])))):el("div",{class:"empty"},"Everyone's on track."),
@@ -2444,7 +2444,7 @@ function mdCard(){
 function mdRow(){
   const s=mdSummary();
   return el("button",{class:"x-mrow",type:"button",onclick:()=>{view={...view,mtab:"check",ltseg:"between",tab:"overview"};render();window.scrollTo(0,0)}},petEl(s.lateMine?"worried":"chill",40,"",OTHERLOOK||{}),
-    el("span",{class:"nm"},el("b",{},s.on),el("span",{},[s.mine.length?`${s.mine.length} for you`:"Nothing for you",s.theirs.length?`${s.theirs.length} with ${s.on}`:""].filter(Boolean).join(" · "))),
+    el("span",{class:"nm"},el("b",{},s.on),el("span",{},[s.o==="elisah"?"MD":"SVP",s.mine.length?`${s.mine.length} for you`:"Nothing for you",s.theirs.length?`${s.theirs.length} with ${s.on}`:""].filter(Boolean).join(" · "))),
     el("span",{class:"x-pill "+(s.mine.length?"mdp":"")},s.mine.length?`${s.mine.length} for you`:"Clear"),el("span",{style:"color:var(--faint);font-size:20px"},"›"));
 }
 
