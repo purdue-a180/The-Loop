@@ -2,11 +2,16 @@
   "name": "loop-180dc",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=18" },
-  "scripts": { "dev": "node scripts/dev.js" },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.js"
+  },
   "dependencies": {
     "@upstash/redis": "1.41.0",
     "bcryptjs": "2.4.3",
-    "jose": "5.10.0"
+    "jose": "5.10.0",
+    "web-push": "3.6.7"
   }
 }

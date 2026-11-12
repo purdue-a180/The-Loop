@@ -38,6 +38,7 @@ const PEOPLE = [
   { id: "alex", name: "Alex", fullName: "Alex Okano", last: "okano", aliases: ["alex"], role: "director", lane: "marketing" },
   { id: "liya", name: "Liya", fullName: "Liya Abil", last: "abil", aliases: ["liya"], role: "director", lane: "ops" },
 ];
+export const LEAD_IDS = PEOPLE.filter((p) => p.role === "lead").map((p) => p.id);
 export const starterPassword = (u) => `${u.last}123`;
 
 export async function ensureSeed() {
@@ -120,6 +121,8 @@ export function allowed(user, seg, write) {
   if (seg[0] === "pending" || seg[0] === "queue") return lead;
   // Each leader's private to-do list: only that leader can read or write it.
   if (seg[0] === "todos") return lead && seg[1] === user.id;
+  // Tasks the MD and SVP give each other: only the two of them can see these.
+  if (seg[0] === "between") return lead;
   if (seg[0] === "lanes") {
     if (seg.length === 1) return lead && !write;
     return lead || seg[1] === user.id;

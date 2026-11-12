@@ -9,7 +9,7 @@ export default wrap(async (req, res) => {
   const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
   if (body.confirm !== "RESET") return send(res, 400, { error: "Confirmation missing." });
   const ids = await kv().smembers("users");
-  const cols = ["pending", "queue", "lanes/_leads/items"];
+  const cols = ["pending", "queue", "lanes/_leads/items", "between/leads/items"];
   for (const id of ids) cols.push(`lanes/${id}/items`, `lanes/${id}/msgs`, `todos/${id}/items`);
   let n = 0;
   for (const c of cols) for (const d of await listCol(c)) { await deleteDoc(`${c}/${d.id}`); n++; }

@@ -679,6 +679,54 @@ body.login .wrap{padding:0!important;max-width:none!important}
   .wa .wabtn{flex:1;text-align:center}
 }
 body:has(#wa) .pops{display:none}
+
+/* ---------- with Liz / with Rishi + notifications ---------- */
+.x-btw{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.x-btw .x-card{padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.x-btw h3{margin:0;font:800 19px/1.1 var(--display);letter-spacing:-.02em}
+.x-btw h3+p{margin:-6px 0 0}
+.x-btw .item.done .ititle{text-decoration:line-through;color:var(--faint)}
+.x-btwadd{display:flex;gap:10px;align-items:center}
+.x-btwadd input[type=date]{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;background:#fff;color:var(--ink)}
+.ihead.nochk{grid-template-columns:minmax(0,1fr) auto auto}
+.x-tag{align-self:center;font-size:11px;font-weight:700;border-radius:99px;padding:3px 9px;background:#E3EED6;color:var(--brand-deep);white-space:nowrap}
+.x-tag.open{background:#FFF3D6;color:#8A6200}
+.x-push{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid #DCE4D2;border-radius:18px;padding:14px 18px;margin-bottom:14px}
+.x-push .ic{width:40px;height:40px;border-radius:12px;background:#E3EED6;display:grid;place-items:center;flex:none}
+.x-push .ic svg{width:22px;height:22px;fill:none;stroke:#2F5410;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.x-push .tx{flex:1;min-width:0}.x-push .tx b{display:block;font-size:15px}.x-push .tx span{font-size:13px;color:var(--muted)}
+.x-push .bt{display:flex;gap:8px;flex:none}
+@media (max-width:900px){.x-btw{grid-template-columns:1fr}.x-btwadd{flex-wrap:wrap}.x-btwadd .p{display:none}.x-btwadd input:not([type=date]){flex:1 1 100%}.x-btwadd input[type=date]{flex:1}
+  .x-push{flex-wrap:wrap}.x-push .bt{width:100%}.x-push .bt button{flex:1}}
+
+.x-rcol{display:grid;grid-template-rows:auto minmax(0,1fr) auto minmax(0,1fr);gap:14px;flex:1;min-height:0}
+.x-dcard.md{background:#EAF3DE;border-color:#BBD79A}.x-dcard.md:hover{border-color:#9BCB5C}
+.x-dcard.md .x-dfoot{color:#3F6D14}.x-pill.mdp{background:#2F5410;color:#fff}
+.x-dcard.md .x-dr .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.x-justnow{overflow:hidden;min-height:0}.x-justnow .x-link{margin-top:auto}
+.x-jn{font:700 12px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+.x-frommd{gap:12px;overflow:hidden;min-height:0}.x-frommd .x-link{margin-top:auto}
+.x-frommd .hd{display:flex;align-items:center;gap:10px}
+.x-frommd .hd .k{font:700 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:#3F6D14}
+.x-frommd .hd b{display:block;font:800 17px/1.1 var(--display);letter-spacing:-.02em;margin-top:2px}
+.x-frommd .hd .op{all:unset;cursor:pointer;margin-left:auto;font-size:13px;font-weight:700;color:var(--brand-deep)}
+
+.x-fm{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.3}
+.x-fm button.ck{all:unset;cursor:pointer;width:18px;height:18px;border:2px solid #C9D3BF;border-radius:50%;flex:none;background:#fff;margin-top:1px;box-sizing:border-box}
+.x-fm button.ck:hover{border-color:#2F5410}
+.x-fm .ring{width:18px;height:18px;border:2px dashed #9BB98A;border-radius:50%;flex:none;margin-top:1px;box-sizing:border-box}
+.x-fm span{min-width:0}.x-fm small{display:block;color:#5B6852;font-size:12px;margin-top:1px}.x-fm small.bad{color:var(--bad)}
+.x-fmadd{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:7px 10px}
+.x-fmadd input{border:0;outline:0;font:inherit;font-size:14px;flex:1;min-width:0;background:none;color:var(--ink)}
+.x-frommd .x-link{align-self:flex-start}
+
+.x-fmhd{display:flex;align-items:center;justify-content:space-between}
+.x-fmhd span{font:700 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.x-fmhd button{all:unset;cursor:pointer;font-size:13px;font-weight:700;color:var(--brand-deep)}
+.x-fmpill{all:unset;cursor:pointer;align-self:flex-start;margin-top:auto;font-size:13px;font-weight:700;color:var(--brand-deep);background:var(--bg2);border:1px solid var(--line);border-radius:99px;padding:6px 13px}
+.x-fmpill:hover{border-color:var(--mint2)}
+.x-frommd .x-fmadd{margin-top:auto;border-radius:99px;padding:6px 12px}
 </style>
 
 </head>
@@ -1730,7 +1778,7 @@ function renderInner(){
   const a=document.activeElement?.id,val=a&&$(a)&&"value" in $(a)?$(a).value:undefined;
   const openDetails=[...document.querySelectorAll("details[open] summary")].map(s=>s.textContent);
   petN=0;
-  $("main").replaceChildren(...[starterNotice(),view.settings?renderSettings():isLead?renderLead():renderDirector()].filter(Boolean));
+  $("main").replaceChildren(...[starterNotice(),typeof pushNudge==="function"?pushNudge():null,view.settings?renderSettings():isLead?renderLead():renderDirector()].filter(Boolean));
   if(view.settings)setHero("Settings",`${ME.user.fullName}`,ME.user.title||roster[myLane?.role]?.title||"",[]);
   setBandActions();
   document.querySelectorAll("details summary").forEach(s=>{if(openDetails.includes(s.textContent))s.parentElement.open=true});
@@ -1770,7 +1818,7 @@ setTimeout(()=>{if(!revealed){revealed=true;$("main").style.visibility=""}},3500
 const isMobile=()=>matchMedia("(max-width:900px)").matches;
 matchMedia("(max-width:900px)").addEventListener?.("change",()=>render());
 view.mtab=view.mtab||"home";
-let LEADLOOK=null,LTODO=[],MSGS={};const skinSubs_={};
+let LEADLOOK=null,OTHERLOOK=null,LTODO=[],MSGS={},BETWEEN=[];const skinSubs_={};
 const INK="#1D2A12";
 const OUTFIT={
   specs:{round:`<g fill="rgba(255,255,255,.18)" stroke="${INK}" stroke-width="2.8"><circle cx="48" cy="58" r="11"/><circle cx="72" cy="58" r="11"/></g><path d="M59 57q1-2 2 0M37 56l-8-3M83 56l8-3" stroke="${INK}" stroke-width="2.8" fill="none" stroke-linecap="round"/>`,
@@ -1832,6 +1880,8 @@ function skinSubs(){
   if(!db)return;
   if(isLead){
     if(!skinSubs_.look){skinSubs_.look=1;db.doc("config/duggy_"+uid).onSnapshot(s=>{LEADLOOK=s.exists?s.data():null;render()},()=>{})}
+    if(!skinSubs_.olook){skinSubs_.olook=1;db.doc("config/duggy_"+otherLead()).onSnapshot(s=>{OTHERLOOK=s.exists?s.data():null;render()},()=>{})}
+    if(!skinSubs_.btw){skinSubs_.btw=1;db.collection("between/leads/items").onSnapshot(s=>{BETWEEN=s.docs.map(d=>({id:d.id,...d.data()}));render()},()=>{})}
     if(!skinSubs_.todo){skinSubs_.todo=1;db.collection(`todos/${uid}/items`).onSnapshot(s=>{LTODO=s.docs.map(d=>({id:d.id,...d.data()}));render()},()=>{})}
     for(const u of Object.keys(lanes))if(!skinSubs_["m"+u]){skinSubs_["m"+u]=1;db.collection(`lanes/${u}/msgs`).onSnapshot(s=>{MSGS[u]=s.docs.map(d=>({id:d.id,...d.data()}));render()},()=>{})}
   }else if(uid&&!skinSubs_.mine){skinSubs_.mine=1;db.collection(`lanes/${uid}/msgs`).onSnapshot(s=>{MSGS[uid]=s.docs.map(d=>({id:d.id,...d.data()}));render()},()=>{})}
@@ -2116,7 +2166,7 @@ function leadHero(compact){
     el("div",{class:"x-hrow"},el("div",{style:"min-width:0"},el("div",{class:"x-k"},todayKicker()),el("h1",{},`${greetWord()}, ${nm}`),el("p",{class:"lede"},leadLede(all,over))),
       el("div",{class:"x-duggy"},el("div",{class:"x-speech"},el("b",{},"Duggy"),el("span",{class:"m"}," · "+MOOD_LABEL[boardW.mood]),el("br"),petLine(boardW,false)),petButton(boardW.mood,104,myLook()))),
     el("div",{class:"x-stats"},stat(op.length,"open tasks"),stat(over,"overdue","bad"),stat(quiet,quiet===1?"director quiet a week":"directors quiet a week","warn"),stat(doneWeek,"done this week","good"),
-      el("div",{style:"display:flex;align-items:center"},bell,el("button",{class:"x-btn",type:"button",onclick:()=>openAssign()},"+ Assign a task"))),
+      el("div",{style:"display:flex;align-items:center;gap:12px"},el("button",{class:"x-btn",type:"button",onclick:()=>openAssign()},"+ Assign a task"),bell)),
     el("div",{style:"display:flex;flex-direction:column;gap:10px"},el("div",{class:"spread"},el("h2",{class:"x-h2",style:"font-size:18px"},"The next 7 days"),el("span",{class:"small muted"},"Every deadline across the board")),weekStrip(all,false)));
 }
 function leadTodosPanel(){
@@ -2148,6 +2198,7 @@ renderLead=function(){
     if(t==="check")return el("div",{class:"x-page",style:"gap:12px"},el("div",{class:"spread"},el("h1",{class:"x-h2",style:"font-size:30px"},"My to-dos"),el("b",{style:"color:var(--brand-deep);font-size:13px"},`${LTODO.filter(x=>!x.done).length} left`)),...leadTodosPanel(),quoteCard());
     const nudge=DIRECTORS.map(k=>[k,dirSummary(k)]).filter(([,s])=>s.w.over||s.w.blocked||s.quietDays>=STALE_DAYS);
     return el("div",{class:"x-page",style:"gap:12px"},...leadHero(true),
+      el("div",{class:"x-lbl"},otherLead()==="elisah"?"From MD":"From SVP"),el("div",{class:"x-card",style:"overflow:hidden"},mdRow()),
       el("div",{class:"x-lbl"},"Needs a nudge"),
       nudge.length?el("div",{class:"x-card",style:"overflow:hidden"},nudge.map(([k,s])=>el("button",{class:"x-mrow",type:"button",onclick:()=>{view.drill=k;render();window.scrollTo(0,0)}},petEl(s.w.mood,36,"",lookForRole(k)),
         el("span",{class:"nm"},el("b",{},first(personFor(k))||short(k)),el("span",{},s.rows[0]?s.rows[0][2].title:`No update in ${s.quietDays} days`)),el("span",{class:"x-pill "+s.state[0]},s.state[1])))):el("div",{class:"empty"},"Everyone's on track."),
@@ -2158,8 +2209,10 @@ renderLead=function(){
 
     el("div",{class:"x-lgrid"},
       el("div",{class:"x-col"},el("h2",{class:"x-h2"},"Directors"),el("div",{class:"x-dirs"},DIRECTORS.map(dirCard))),
-      el("div",{class:"x-col"},el("h2",{class:"x-h2"},"Just now"),el("section",{class:"x-panel",style:"flex:1"},feedEvents(5).length?feedEvents(5):el("p",{class:"small muted"},"Completions, comments and new tasks show up here."),
-        el("button",{class:"x-link",type:"button",onclick:()=>{view.feed=true;render()}},"See all activity →")))),
+      el("div",{class:"x-col"},el("div",{class:"x-rcol"},el("h2",{class:"x-h2"},"Just now"),
+        el("section",{class:"x-panel x-justnow"},feedEvents(3).length?feedEvents(3):el("p",{class:"small muted"},"Completions, comments and new tasks show up here."),
+        el("button",{class:"x-link",type:"button",onclick:()=>{view.feed=true;render()}},"See all activity →")),
+        el("h2",{class:"x-h2"},"From "+leadName(otherLead())),fromMdPanel()))),
     view.feed?renderFeed():null);
 };
 /* drill: messages panel + kudos */
@@ -2267,6 +2320,157 @@ renderInner=function(){
   if(a&&$(a)){if(val!==undefined&&$(a).type!=="file"&&$(a).type!=="checkbox")$(a).value=val;$(a).focus()}
   checkPops();
 };
+
+/* ---------- tasks between Liz and Rishi (only the two of them see these) ---------- */
+ICONS.between='<svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3.2"/><circle cx="16.5" cy="9.5" r="2.7"/><path d="M2.5 20a5.5 5.5 0 0 1 11 0M13.5 20a4.5 4.5 0 0 1 8 -2.8"/></svg>';
+function otherLead(){return uid==="rishi"?"elisah":"rishi"}
+function betweenPanel(){
+  const o=otherLead(),on=leadName(o);
+  const sortT=(a,b)=>(a.done?1:0)-(b.done?1:0)||(a.due||"9").localeCompare(b.due||"9")||(b.createdAt||"").localeCompare(a.createdAt||"");
+  const keep=t=>!t.done||daysSince(t.doneAt)<=7;
+  const mine=BETWEEN.filter(t=>t.to===uid&&keep(t)).sort(sortT),theirs=BETWEEN.filter(t=>t.to===o&&keep(t)).sort(sortT);
+  const inp=el("input",{id:"btwAdd",placeholder:`Add a task for ${on}…`,"aria-label":`Add a task for ${on}`,onkeydown:e=>{if(e.key==="Enter")add()}});
+  const due=el("input",{id:"btwDue",type:"date","aria-label":"Due date (optional)"});
+  const add=async()=>{const v=inp.value.trim();if(!v){inp.focus();return}const d=due.value;inp.value="";due.value="";
+    try{await db.collection("between/leads/items").add({title:v.slice(0,200),due:d||"",to:o,by:uid,done:false,createdAt:new Date().toISOString()});toast(`Added for ${on}`)}catch(e){writeFail(e)}};
+  const sub=t=>t.done?`Done ${t.doneAt?fmtDate(t.doneAt.slice(0,10)):""}`:t.due?(daysUntil(t.due)<0?`Overdue · ${fmtDate(t.due)}`:daysUntil(t.due)===0?"Due today":`Due ${fmtDate(t.due)}`):"No due date";
+  const row=(t,forMe)=>el("div",{class:"item"+(t.done?" done":"")},el("div",{class:"ihead"+(forMe?"":" nochk")},
+    forMe?el("button",{class:"check"+(t.done?" on":""),type:"button","aria-pressed":!!t.done,"aria-label":t.done?"Mark not done":"Mark done",html:CHECK,
+      onclick:()=>t.done?db.doc("between/leads/items/"+t.id).update({done:false,doneAt:null}).catch(writeFail):finishBetween(t)}):null,
+    el("div",{class:"iopen"},el("div",{class:"ititle"},t.title),el("div",{class:"isub",style:!t.done&&t.due&&daysUntil(t.due)<0?"color:var(--bad)":""},sub(t))),
+    forMe?null:el("span",{class:"x-tag"+(t.done?"":" open")},t.done?"Done":"Open"),
+    t.by===uid?el("button",{class:"trash",type:"button","aria-label":"Delete",html:TRASH,onclick:()=>db.doc("between/leads/items/"+t.id).delete().catch(writeFail)}):null));
+  const col=(title,note,list,forMe,empty)=>el("section",{class:"x-card"},el("div",{class:"spread"},el("h3",{},title),el("b",{style:"color:var(--brand-deep);font-size:13px"},`${list.filter(t=>!t.done).length} open`)),
+    el("p",{class:"small muted"},note),list.length?el("div",{class:"list"},list.map(t=>row(t,forMe))):el("div",{class:"empty"},empty));
+  return el("div",{style:"display:flex;flex-direction:column;gap:16px"},
+    el("div",{class:"x-add x-btwadd"},el("span",{class:"p"},"+"),inp,due,el("button",{class:"x-btn",type:"button",onclick:add},`Add for ${on}`)),
+    el("div",{class:"x-btw"},
+      col("For you",`From ${on}. Tick it off when it's done and ${on} gets a notification.`,mine,true,`Nothing from ${on} right now.`),
+      col(`For ${on}`,`What you've given ${on}. You'll be notified when it's done.`,theirs,false,`You haven't given ${on} anything yet.`)),
+    el("p",{class:"small muted",style:"margin:0"},`Only you and ${on} can see this page. Finished tasks clear after a week.`));
+}
+{const _rlB=renderLead;
+renderLead=function(){
+  if(!view.preview&&!view.drill&&view.tab==="between"&&!isMobile())return el("div",{class:"x-page"},el("button",{class:"btn text",type:"button",style:"align-self:flex-start",onclick:()=>{view.tab="overview";render();window.scrollTo(0,0)}},"← Home"),pageWrap("Just the two of you",`You & ${leadName(otherLead())}`,betweenPanel()));
+  if(isMobile()&&!view.preview&&!view.drill&&view.tab==="overview"&&view.mtab==="check"){
+    const seg=view.ltseg||"mine",on=leadName(otherLead()),n=BETWEEN.filter(t=>t.to===uid&&!t.done).length;
+    const sb=(k,l)=>el("button",{type:"button","aria-pressed":seg===k,onclick:()=>{view.ltseg=k;render()}},l);
+    return el("div",{class:"x-page",style:"gap:12px"},
+      el("div",{class:"spread"},el("h1",{class:"x-h2",style:"font-size:30px"},seg==="mine"?"My to-dos":`You & ${on}`),seg==="mine"?el("b",{style:"color:var(--brand-deep);font-size:13px"},`${LTODO.filter(x=>!x.done).length} left`):null),
+      el("div",{class:"x-seg"},sb("mine","Just me"),sb("between",`With ${on}${n?` · ${n}`:""}`)),
+      ...(seg==="mine"?[...leadTodosPanel(),quoteCard()]:[betweenPanel()]));
+  }
+  return _rlB();
+};}
+
+/* ---------- notifications on phones and laptops ---------- */
+const BELL_IC='<svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
+const pIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const pStandalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+function pushState(){
+  if(!("serviceWorker" in navigator))return "unsupported";
+  if(!("PushManager" in window)||!("Notification" in window))return pIOS&&!pStandalone?"install":"unsupported";
+  return Notification.permission; // default | granted | denied
+}
+function b64ToBytes(s){const p="=".repeat((4-s.length%4)%4),b=atob((s+p).replace(/-/g,"+").replace(/_/g,"/"));return Uint8Array.from(b,c=>c.charCodeAt(0))}
+let PUSH_ON=null;
+async function refreshPushOn(){try{const r=await navigator.serviceWorker.ready;PUSH_ON=!!(await r.pushManager.getSubscription())}catch(e){PUSH_ON=false}render()}
+async function enablePush(){
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=="granted"){toast(perm==="denied"?"Notifications are blocked. Turn them on in your phone or browser settings.":"Notifications not turned on");render();return}
+    const r=await navigator.serviceWorker.ready;const {key}=await API.call("/api/push");
+    let s=await r.pushManager.getSubscription();
+    if(!s)s=await r.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToBytes(key)});
+    await API.call("/api/push",{subscription:s.toJSON()});PUSH_ON=true;store("pushAsk","done");toast("Notifications are on");render();
+  }catch(e){toast("Couldn't turn on notifications: "+(e.message||"try again"));render()}
+}
+async function disablePush(){
+  try{const r=await navigator.serviceWorker.ready;const s=await r.pushManager.getSubscription();if(s){await API.call("/api/push",{unsubscribe:s.endpoint}).catch(()=>{});await s.unsubscribe()}PUSH_ON=false;toast("Notifications are off");render()}catch(e){toast("Couldn't turn them off")}
+}
+let pushSynced=false;
+function syncPush(){
+  if(pushSynced||!authed||pushState()!=="granted")return;pushSynced=true;
+  navigator.serviceWorker.ready.then(r=>r.pushManager.getSubscription()).then(s=>{PUSH_ON=!!s;if(s)return API.call("/api/push",{subscription:s.toJSON()})}).catch(()=>{});
+}
+const PUSH_WHAT=()=>isLead?`When ${leadName(otherLead())} gives you a task or a director messages you or finishes a task.`:"When Liz or Rishi assigns you a task, comments, gives kudos or messages you.";
+function pushNudge(){
+  if(!ME||!authed)return null;
+  syncPush();
+  if(view.settings||view.tab==="meeting"||view.tab==="roster"||view.drill||view.preview)return null;
+  if(isMobile()&&view.mtab!=="home")return null;
+  const st=pushState(),seen=store("pushAsk");
+  if(seen==="done"||seen==="later"&&daysSince(store("pushAskAt"))<5)return null;
+  if(st!=="default"&&st!=="install")return null;
+  const later=()=>{store("pushAsk","later");store("pushAskAt",new Date().toISOString());render()};
+  return el("div",{class:"x-push"},el("span",{class:"ic",html:BELL_IC}),
+    el("div",{class:"tx"},el("b",{},st==="install"?"Get notifications on your phone":"Turn on notifications"),
+      el("span",{},st==="install"?"Add loop to your Home Screen (Share → Add to Home Screen), open it from there, then turn them on.":PUSH_WHAT())),
+    el("div",{class:"bt"},el("button",{class:"btn text",type:"button",onclick:later},"Not now"),st==="install"?null:el("button",{class:"x-btn",type:"button",onclick:enablePush},"Turn on")));
+}
+function notifCard(){
+  const st=pushState();if(st==="granted"&&PUSH_ON===null)refreshPushOn();
+  const on=st==="granted"&&PUSH_ON;
+  const msg=st==="install"?"On iPhone, notifications only work once loop is on your Home Screen. In Safari tap Share → Add to Home Screen, open loop from the new icon, and come back here."
+    :st==="unsupported"?"This browser can't show notifications. Try Chrome, Edge or Safari, or the app on your phone."
+    :st==="denied"?"Notifications are blocked for loop. Allow them in your phone or browser settings, then come back here."
+    :on?"On for this device. "+PUSH_WHAT():"Off for this device. "+PUSH_WHAT();
+  const btns=st==="denied"||st==="unsupported"||st==="install"?[]:on?[el("button",{class:"btn",type:"button",onclick:()=>API.call("/api/push",{test:true}).then(()=>toast("Test sent")).catch(()=>toast("Couldn't send a test"))},"Send a test"),el("button",{class:"btn text",type:"button",onclick:disablePush},"Turn off")]
+    :[el("button",{class:"btn primary",type:"button",onclick:enablePush},"Turn on notifications")];
+  return el("div",{class:"card",id:"pushCard"},el("h3",{},"Notifications"),el("p",{class:"small muted"},msg),btns.length?el("div",{class:"row"},...btns):null,
+    el("p",{class:"small muted",style:"margin-top:6px"},"Turn them on separately on each phone or laptop you use."));
+}
+{const _rsi=renderSettingsInner;renderSettingsInner=function(){const n=_rsi();try{n.insertBefore(notifCard(),n.children[2]||null)}catch(e){n.appendChild(notifCard())}return n}}
+
+function mdSummary(){
+  const o=otherLead(),recent=t=>!t.done||daysSince(t.doneAt)<=7;
+  const all=BETWEEN.filter(recent),mine=all.filter(t=>t.to===uid&&!t.done),theirs=all.filter(t=>t.to===o&&!t.done);
+  const by=(a,b)=>(a.due||"9").localeCompare(b.due||"9");mine.sort(by);theirs.sort(by);
+  const lateMine=mine.filter(t=>t.due&&daysUntil(t.due)<0).length;
+  return {o,on:leadName(o),all,mine,theirs,done:all.filter(t=>t.done).length,lateMine};
+}
+function mdCard(){
+  const s=mdSummary();
+  const due=t=>{if(!t.due)return"";const d=daysUntil(t.due);return d===0?"Today":d<0||d>6?fmtDate(t.due):DOW[new Date(t.due+"T00:00:00").getDay()]};
+  const rows=[];if(s.mine[0])rows.push(["For you",s.mine[0]]);if(s.theirs[0])rows.push([`For ${s.on}`,s.theirs[0]]);
+  const mood=s.lateMine?"worried":s.mine.length?"busy":"chill";
+  const pill=s.mine.length?[`${s.mine.length} for you`,"mdp"]:s.theirs.length?[`${s.theirs.length} with ${s.on}`,""]:["All clear",""];
+  return el("button",{class:"x-dcard md",type:"button",onclick:()=>{view={...view,tab:"between",drill:null,feed:false};render();window.scrollTo(0,0)}},
+    el("div",{class:"x-dtop"},petEl(mood,42,"",OTHERLOOK||{}),el("span",{class:"nm"},el("b",{},s.on),el("span",{},s.o==="elisah"?"Managing Director":"Senior Vice President")),el("span",{class:"x-pill "+pill[1]},pill[0])),
+    el("div",{class:"x-prog"},el("span",{class:"tr"},el("i",{style:`width:${s.all.length?Math.round(s.done/s.all.length*100):0}%`})),el("b",{},`${s.done}/${s.all.length} done`)),
+    rows.length?el("div",{class:"x-drows"},rows.map(([l,t])=>el("div",{class:"x-dr"+(t.due&&daysUntil(t.due)<0?" bad":"")},el("span",{class:"l"},l),el("span",{class:"t"},t.title),el("span",{class:"w"},due(t))))):el("div",{class:"x-drows"},el("div",{class:"x-dr"},el("span",{class:"t",style:"color:var(--muted)"},`Tap to give ${s.on} a task.`))),
+    el("div",{class:"x-dfoot"},`Only you and ${s.on} see this`));
+}
+function mdRow(){
+  const s=mdSummary();
+  return el("button",{class:"x-mrow",type:"button",onclick:()=>{view={...view,mtab:"check",ltseg:"between",tab:"overview"};render();window.scrollTo(0,0)}},petEl(s.lateMine?"worried":"chill",40,"",OTHERLOOK||{}),
+    el("span",{class:"nm"},el("b",{},s.on),el("span",{},[s.mine.length?`${s.mine.length} for you`:"Nothing for you",s.theirs.length?`${s.theirs.length} with ${s.on}`:""].filter(Boolean).join(" · "))),
+    el("span",{class:"x-pill "+(s.mine.length?"mdp":"")},s.mine.length?`${s.mine.length} for you`:"Clear"),el("span",{style:"color:var(--faint);font-size:20px"},"›"));
+}
+
+function finishBetween(t){
+  return db.doc("between/leads/items/"+t.id).update({done:true,doneAt:new Date().toISOString()})
+    .then(()=>{const who=leadName(t.by);toast(`Done. ${who} will be notified.`);shareNudge("done",{...t,title:String(t.title||"").replace(/\bme\b/gi,who).replace(/\bmyself\b/gi,who)},"lead")}).catch(writeFail);
+}
+function fromMdPanel(){
+  const s=mdSummary();
+  const dd=t=>{if(!t.due)return"No due date";const d=daysUntil(t.due);return d<0?"Overdue":d===0?"Due today":d===1?"Due tomorrow":"Due "+(d>6?fmtDate(t.due):DOW[new Date(t.due+"T00:00:00").getDay()])};
+  const rows=s.mine.slice(0,2).map(t=>el("div",{class:"x-fm"},el("button",{class:"ck",type:"button","aria-label":"Mark done",title:"Mark done",onclick:()=>finishBetween(t)}),
+    el("span",{},t.title,el("small",{class:t.due&&daysUntil(t.due)<0?"bad":""},dd(t)))));
+  const open=()=>{view={...view,tab:"between",drill:null,feed:false};render();window.scrollTo(0,0)};
+  let adder;
+  if(view.fmAdding){
+    const inp=el("input",{id:"fmAdd",placeholder:`Task for ${s.on}…`,"aria-label":`Give ${s.on} a task`,
+      onkeydown:async e=>{if(e.key==="Escape"){view.fmAdding=false;render();return}if(e.key!=="Enter")return;const v=inp.value.trim();if(!v)return;inp.value="";
+        try{await db.collection("between/leads/items").add({title:v.slice(0,200),due:"",to:s.o,by:uid,done:false,createdAt:new Date().toISOString()});toast(`Added for ${s.on}`);view.fmAdding=false;render()}catch(err){writeFail(err)}},
+      onblur:()=>setTimeout(()=>{if(view.fmAdding&&!inp.value.trim()&&document.activeElement!==inp){view.fmAdding=false;render()}},150)});
+    adder=el("label",{class:"x-fmadd"},el("span",{style:"color:var(--brand-deep);font-weight:700"},"+"),inp);
+    setTimeout(()=>{const i=$("fmAdd");if(i&&document.activeElement!==i)i.focus()},0);
+  }else adder=el("button",{class:"x-fmpill",type:"button",onclick:()=>{view.fmAdding=true;render()}},`+ Task for ${s.on}`);
+  return el("section",{class:"x-panel x-frommd"},
+    el("div",{class:"x-fmhd"},el("span",{},s.mine.length?`For you · ${s.mine.length}`:"For you"),el("button",{type:"button",onclick:open},"Open all →")),
+    rows.length?rows:el("p",{class:"small muted",style:"margin:0"},`Nothing from ${s.on} right now.`),adder);
+}
 </script>
 
 </body>
