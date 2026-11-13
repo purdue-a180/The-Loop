@@ -1652,7 +1652,7 @@ function renderDrill(k){
     el("div",{class:"spread"},
       el("div",{},el("button",{class:"btn text",type:"button",onclick:()=>{view.drill=null;view.assigning=false;render()}},"← All directors"),
         el("h2",{},roster[k].title),el("p",{class:"small muted"},personFor(k)||(expectedName(k)?expectedName(k)+" · not joined yet":"Not joined yet"))),
-      el("div",{class:"row"},clearAllBtn(k),el("button",{class:"btn",type:"button",onclick:()=>{view.preview=k;window.scrollTo(0,0);render()}},"Preview their view"),
+      el("div",{class:"row"},el("button",{class:"btn",type:"button",onclick:()=>{view.preview=k;window.scrollTo(0,0);render()}},"Preview their view"),
         el("button",{class:"btn primary",type:"button",onclick:()=>openAssign(k)},"+ Assign a task"))),
     uidsForRole(k).length>1?el("div",{class:"banner"},"Two people claimed this role. Remove the wrong one under Roles and access."):null,
     el("div",{class:"list"},op.length?op.map(i=>itemRow(i,i._lane,true)):el("div",{class:"empty"},"No open items.")),
@@ -2273,7 +2273,7 @@ function drillPhone(k){
       el("div",{class:"tx"},el("div",{},el("b",{},PET_NAME),el("span",{class:"muted"}," · "+MOOD_LABEL[w.mood])),el("div",{class:"small muted"},petLine(w,false)),
         el("div",{class:"load"},el("span",{class:"track"},el("i",{class:w.load>=85?"over":w.load>=60?"heavy":"",style:`width:${Math.max(4,w.load)}%`})),el("b",{},loadLabel(w.load))))),
     u?msgPanel(u):null,
-    el("div",{class:"x-dpfoot"},el("button",{class:"btn text",type:"button",onclick:()=>{view.preview=k;window.scrollTo(0,0);render()}},"Preview their view"),clearAllBtn(k)),
+    el("div",{class:"x-dpfoot"},el("button",{class:"btn text",type:"button",onclick:()=>{view.preview=k;window.scrollTo(0,0);render()}},"Preview their view")),
     el("div",{style:"height:20px","aria-hidden":"true"}));
 }
 renderDrill=function(k){
