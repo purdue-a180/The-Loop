@@ -744,6 +744,16 @@ body:has(#wa) .pops{display:none}
 .x-upadd{display:flex;gap:8px;align-items:flex-end}
 .x-upadd textarea{flex:1;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;font-size:14px;resize:vertical;min-height:44px;background:#fff;color:var(--ink)}
 .x-fm .tx,.x-btw .iopen{cursor:pointer}
+
+.x-dphd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.x-dphd .x-btn{flex:none}
+.x-dpsec{display:flex;align-items:center;gap:8px;margin-top:4px}.x-dpsec .x-lbl{margin:0}.x-dpsec b{font-size:12px;background:var(--bg2);border:1px solid var(--line);border-radius:99px;padding:1px 8px;color:var(--muted)}
+.x-donelist .item{opacity:.75}
+.x-dpet{display:flex;flex-direction:row;align-items:center;gap:14px;padding:14px 16px}
+.x-dpet .tx{flex:1;min-width:0;display:grid;gap:4px;font-size:14px}
+.x-dpet .load{display:flex;align-items:center;gap:10px;font-size:12px}.x-dpet .load .track{flex:1;height:6px;background:var(--bg2);border-radius:99px;overflow:hidden}
+.x-dpet .load .track i{display:block;height:100%;background:var(--brand);border-radius:99px}.x-dpet .load .track i.heavy{background:var(--warn)}.x-dpet .load .track i.over{background:var(--bad)}
+.x-dpfoot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:10px}
 </style>
 
 </head>
@@ -2237,7 +2247,37 @@ renderLead=function(){
 };
 /* drill: messages panel + kudos */
 const _renderDrill=renderDrill;
+function msgPanel(u){
+  const ms=(MSGS[u]||[]).slice().sort((a,b)=>a.at.localeCompare(b.at)).slice(-6);
+  const inp=el("input",{id:"msg_"+u,placeholder:`Message ${first(laneName(u))||"them"}…`});
+  const send=async()=>{const v=inp.value.trim();if(!v)return;try{await db.collection(`lanes/${u}/msgs`).add({text:v.slice(0,800),side:"lead",by:uid,at:new Date().toISOString()});inp.value="";toast("Sent")}catch(e){writeFail(e)}};
+  inp.addEventListener("keydown",e=>{if(e.key==="Enter")send()});
+  return el("section",{class:"x-panel"},el("h3",{},"Messages"),ms.length?ms.map(m=>el("div",{class:"x-msg"},el("span",{class:"x-av"+(m.side==="dir"?" l2":"")},m.side==="dir"?initials(laneName(u)):(LEAD_INI[m.by]||initials(leadName(m.by)))),el("span",{},m.text,el("small",{},ago(m.at))))):el("p",{class:"small muted"},"No messages yet."),
+    el("div",{class:"x-compose"},inp,el("button",{type:"button",onclick:send},"Send")));
+}
+function drillPhone(k){
+  const its=roleItems(k).sort(sortItems),op=its.filter(i=>i.status!=="done"),done=its.filter(i=>i.status==="done").sort((a,b)=>(b.doneAt||b.lastUpdateAt||"").localeCompare(a.doneAt||a.lastUpdateAt||""));
+  const w=workload(its),u=uidsForRole(k)[0],nm=personFor(k)||(expectedName(k)?expectedName(k)+" · not joined yet":"Not joined yet");
+  const showAll=view.drillDoneAll;
+  return el("div",{class:"x-page x-dp",style:"gap:14px"},
+    el("button",{class:"btn text",type:"button",style:"justify-self:start;padding-left:0",onclick:()=>{view.drill=null;render();window.scrollTo(0,0)}},"← Directors"),
+    el("div",{class:"x-dphd"},el("div",{},el("h1",{class:"x-h2",style:"font-size:26px;line-height:1.1"},first(nm)||nm),el("p",{class:"small muted",style:"margin:4px 0 0"},roster[k].title)),
+      el("button",{class:"x-btn",type:"button",onclick:()=>openAssign(k)},"+ Assign")),
+    uidsForRole(k).length>1?el("div",{class:"banner"},"Two people claimed this role. Remove the wrong one under Roles and access."):null,
+    el("div",{class:"x-dpsec"},el("span",{class:"x-lbl"},"Current"),el("b",{},op.length)),
+    el("div",{class:"list"},op.length?op.map(i=>itemRow(i,i._lane,true)):el("div",{class:"empty"},"Nothing open right now.")),
+    done.length?el("div",{class:"x-dpsec"},el("span",{class:"x-lbl"},"Completed"),el("b",{},done.length)):null,
+    done.length?el("div",{class:"list x-donelist"},(showAll?done:done.slice(0,4)).map(i=>itemRow(i,i._lane,true))):null,
+    done.length>4?el("button",{class:"btn text",type:"button",style:"justify-self:start",onclick:()=>{view.drillDoneAll=!showAll;render()}},showAll?"Show fewer":`Show all ${done.length}`):null,
+    el("section",{class:"x-panel x-dpet"},petEl(w.mood,52,"",lookForRole(k)),
+      el("div",{class:"tx"},el("div",{},el("b",{},PET_NAME),el("span",{class:"muted"}," · "+MOOD_LABEL[w.mood])),el("div",{class:"small muted"},petLine(w,false)),
+        el("div",{class:"load"},el("span",{class:"track"},el("i",{class:w.load>=85?"over":w.load>=60?"heavy":"",style:`width:${Math.max(4,w.load)}%`})),el("b",{},loadLabel(w.load))))),
+    u?msgPanel(u):null,
+    el("div",{class:"x-dpfoot"},el("button",{class:"btn text",type:"button",onclick:()=>{view.preview=k;window.scrollTo(0,0);render()}},"Preview their view"),clearAllBtn(k)),
+    el("div",{style:"height:20px","aria-hidden":"true"}));
+}
 renderDrill=function(k){
+  if(isMobile())return drillPhone(k);
   const out=_renderDrill(k);const u=uidsForRole(k)[0];
   const side=out.querySelector?.("aside");
   if(u&&side){
