@@ -727,6 +727,23 @@ body:has(#wa) .pops{display:none}
 .x-fmpill{all:unset;cursor:pointer;align-self:flex-start;margin-top:auto;font-size:13px;font-weight:700;color:var(--brand-deep);background:var(--bg2);border:1px solid var(--line);border-radius:99px;padding:6px 13px}
 .x-fmpill:hover{border-color:var(--mint2)}
 .x-frommd .x-fmadd{margin-top:auto;border-radius:99px;padding:6px 12px}
+
+.x-btwm{padding:22px 24px;gap:14px;width:min(560px,100%)}
+.x-btwm-hd{display:flex;align-items:center;justify-content:space-between}
+.x-btwm-hd .k,.x-lblsm{font:700 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.x-lblsm{margin-bottom:8px}
+.x-btwm h2{margin:0;font:800 24px/1.15 var(--display);letter-spacing:-.02em}
+.x-stg{display:flex;gap:6px;flex-wrap:wrap}
+.x-stb{border:1px solid var(--line);background:var(--bg2);color:var(--ink);border-radius:99px;padding:7px 13px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.x-stb:disabled{cursor:default;opacity:.55}.x-stb.on{opacity:1;color:#fff;border-color:transparent;background:var(--deep)}
+.x-stb.on.blocked{background:var(--warn)}.x-stb.on.done{background:#3F6D14}
+.x-ups{display:flex;flex-direction:column;gap:8px;max-height:240px;overflow:auto}
+.x-up{background:var(--bg2);border-radius:12px;padding:9px 12px;font-size:14px;max-width:88%}
+.x-up.mine{background:#EAF3DE;align-self:flex-end}
+.x-upm{display:flex;gap:8px;font-size:12px;color:var(--muted);margin-bottom:2px}.x-upm b{color:var(--ink)}
+.x-upadd{display:flex;gap:8px;align-items:flex-end}
+.x-upadd textarea{flex:1;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;font-size:14px;resize:vertical;min-height:44px;background:#fff;color:var(--ink)}
+.x-fm .tx,.x-btw .iopen{cursor:pointer}
 </style>
 
 </head>
@@ -2188,12 +2205,15 @@ renderLead=function(){
   if(isMobile()){
     const t=view.mtab;
     if(t==="users"){const f=view.mfilter||"all";
-      const ks=DIRECTORS.filter(k=>{const s=dirSummary(k);return f==="all"||(f==="late"&&s.w.over)||(f==="quiet"&&(s.w.quiet||s.w.blocked))||(f==="ok"&&!s.w.over&&!s.w.quiet&&!s.w.blocked)});
+      const cat=s=>s.w.over?"late":(s.w.quiet||s.w.blocked)?"quiet":"ok",rank={late:0,quiet:1,ok:2};
+      const md=mdSummary();
+      const entries=[...DIRECTORS.map(k=>{const s=dirSummary(k);return {k,s,c:cat(s)}}),{k:"_md",c:md.cat}]
+        .filter(e=>f==="all"||e.c===f).map((e,i)=>({...e,i})).sort((a,b)=>rank[a.c]-rank[b.c]||a.i-b.i);
       const fb=(k,l)=>el("button",{type:"button","aria-pressed":f===k,onclick:()=>{view.mfilter=k;render()}},l);
       return el("div",{class:"x-page",style:"gap:12px"},el("h1",{class:"x-h2",style:"font-size:30px"},"Directors"),el("div",{class:"x-seg"},fb("all","All"),fb("late","Late"),fb("quiet","Quiet"),fb("ok","On track")),
-        el("div",{class:"x-card",style:"overflow:hidden"},mdRow()),
-        el("div",{class:"x-card",style:"overflow:hidden"},ks.map(k=>{const s=dirSummary(k);return el("button",{class:"x-mrow",type:"button",onclick:()=>{view.drill=k;render();window.scrollTo(0,0)}},petEl(s.w.mood,40,"",lookForRole(k)),
-          el("span",{class:"nm"},el("b",{},first(personFor(k))||expectedName(k)||short(k)),el("span",{},`${ROLE_SHORT[k]||short(k)} · ${s.done}/${s.its.length} done`)),el("span",{class:"x-pill "+s.state[0]},s.state[1]),el("span",{style:"color:var(--faint);font-size:20px"},"›"))})),
+        entries.length?el("div",{class:"x-card",style:"overflow:hidden"},entries.map(({k,s})=>{if(k==="_md")return mdRow();return el("button",{class:"x-mrow",type:"button",onclick:()=>{view.drill=k;render();window.scrollTo(0,0)}},petEl(s.w.mood,40,"",lookForRole(k)),
+          el("span",{class:"nm"},el("b",{},first(personFor(k))||expectedName(k)||short(k)),el("span",{},`${ROLE_SHORT[k]||short(k)} · ${s.done}/${s.its.length} done`)),el("span",{class:"x-pill "+s.state[0]},s.state[1]),el("span",{style:"color:var(--faint);font-size:20px"},"›"))})):el("p",{class:"small muted",style:"padding:6px 4px"},"Nobody here right now."),
+        el("div",{style:"height:76px","aria-hidden":"true"}),
         el("button",{class:"x-fab",type:"button",onclick:()=>openAssign()},"+ Assign"));}
     if(t==="bolt")return el("div",{class:"x-page",style:"gap:12px"},el("h1",{class:"x-h2",style:"font-size:30px"},"Activity"),el("section",{class:"x-panel"},feedEvents(40).length?feedEvents(40):el("p",{class:"small muted"},"Nothing yet.")));
     if(t==="check")return el("div",{class:"x-page",style:"gap:12px"},el("div",{class:"spread"},el("h1",{class:"x-h2",style:"font-size:30px"},"My to-dos"),el("b",{style:"color:var(--brand-deep);font-size:13px"},`${LTODO.filter(x=>!x.done).length} left`)),...leadTodosPanel(),quoteCard());
@@ -2336,9 +2356,9 @@ function betweenPanel(){
   const sub=t=>t.done?`Done ${t.doneAt?fmtDate(t.doneAt.slice(0,10)):""}`:t.due?(daysUntil(t.due)<0?`Overdue · ${fmtDate(t.due)}`:daysUntil(t.due)===0?"Due today":`Due ${fmtDate(t.due)}`):"No due date";
   const row=(t,forMe)=>el("div",{class:"item"+(t.done?" done":"")},el("div",{class:"ihead"+(forMe?"":" nochk")},
     forMe?el("button",{class:"check"+(t.done?" on":""),type:"button","aria-pressed":!!t.done,"aria-label":t.done?"Mark not done":"Mark done",html:CHECK,
-      onclick:()=>t.done?db.doc("between/leads/items/"+t.id).update({done:false,doneAt:null}).catch(writeFail):finishBetween(t)}):null,
-    el("div",{class:"iopen"},el("div",{class:"ititle"},t.title),el("div",{class:"isub",style:!t.done&&t.due&&daysUntil(t.due)<0?"color:var(--bad)":""},sub(t))),
-    forMe?null:el("span",{class:"x-tag"+(t.done?"":" open")},t.done?"Done":"Open"),
+      onclick:()=>t.done?db.doc("between/leads/items/"+t.id).update({done:false,status:"doing",doneAt:null}).catch(writeFail):finishBetween(t)}):null,
+    el("div",{class:"iopen",role:"button",tabindex:"0",onclick:()=>openBetween(t.id),onkeydown:e=>{if(e.key==="Enter")openBetween(t.id)}},el("div",{class:"ititle"},t.title),el("div",{class:"isub",style:!t.done&&t.due&&daysUntil(t.due)<0?"color:var(--bad)":""},[sub(t),!t.done&&stOf(t)!=="todo"?STATUS[stOf(t)]:"",(t.updates||[]).length?`${t.updates.length} update${t.updates.length>1?"s":""}`:""].filter(Boolean).join(" · "))),
+    forMe?null:el("span",{class:"x-tag"+(t.done?"":stOf(t)==="blocked"?" open":" open")},t.done?"Done":STATUS[stOf(t)]==="Not started"?"Open":STATUS[stOf(t)]),
     t.by===uid?el("button",{class:"trash",type:"button","aria-label":"Delete",html:TRASH,onclick:()=>db.doc("between/leads/items/"+t.id).delete().catch(writeFail)}):null));
   const col=(title,note,list,forMe,empty)=>el("section",{class:"x-card"},el("div",{class:"spread"},el("h3",{},title),el("b",{style:"color:var(--brand-deep);font-size:13px"},`${list.filter(t=>!t.done).length} open`)),
     el("p",{class:"small muted"},note),list.length?el("div",{class:"list"},list.map(t=>row(t,forMe))):el("div",{class:"empty"},empty));
@@ -2427,7 +2447,9 @@ function mdSummary(){
   const all=BETWEEN.filter(recent),mine=all.filter(t=>t.to===uid&&!t.done),theirs=all.filter(t=>t.to===o&&!t.done);
   const by=(a,b)=>(a.due||"9").localeCompare(b.due||"9");mine.sort(by);theirs.sort(by);
   const lateMine=mine.filter(t=>t.due&&daysUntil(t.due)<0).length;
-  return {o,on:leadName(o),all,mine,theirs,done:all.filter(t=>t.done).length,lateMine};
+  const hers=all.filter(t=>t.to===o),herLate=theirs.filter(t=>t.due&&daysUntil(t.due)<0).length,herBlocked=theirs.filter(t=>t.status==="blocked").length;
+  const state=herLate?["bad",`${herLate} late`]:herBlocked?["warn",`${herBlocked} blocked`]:hers.length?["","On track"]:["plain","No tasks"];
+  return {o,on:leadName(o),all,mine,theirs,hers,herDone:hers.filter(t=>t.done).length,done:all.filter(t=>t.done).length,lateMine,state,cat:herLate?"late":herBlocked?"quiet":"ok"};
 }
 function mdCard(){
   const s=mdSummary();
@@ -2443,20 +2465,20 @@ function mdCard(){
 }
 function mdRow(){
   const s=mdSummary();
-  return el("button",{class:"x-mrow",type:"button",onclick:()=>{view={...view,mtab:"check",ltseg:"between",tab:"overview"};render();window.scrollTo(0,0)}},petEl(s.lateMine?"worried":"chill",40,"",OTHERLOOK||{}),
-    el("span",{class:"nm"},el("b",{},s.on),el("span",{},[s.o==="elisah"?"MD":"SVP",s.mine.length?`${s.mine.length} for you`:"Nothing for you",s.theirs.length?`${s.theirs.length} with ${s.on}`:""].filter(Boolean).join(" · "))),
-    el("span",{class:"x-pill "+(s.mine.length?"mdp":"")},s.mine.length?`${s.mine.length} for you`:"Clear"),el("span",{style:"color:var(--faint);font-size:20px"},"›"));
+  return el("button",{class:"x-mrow",type:"button",onclick:()=>{view={...view,mtab:"check",ltseg:"between",tab:"overview"};render();window.scrollTo(0,0)}},petEl(s.herLate?"worried":"chill",40,"",OTHERLOOK||{}),
+    el("span",{class:"nm"},el("b",{},s.on),el("span",{},[s.o==="elisah"?"MD":"SVP",`${s.herDone}/${s.hers.length} done`,s.mine.length?`${s.mine.length} for you`:""].filter(Boolean).join(" · "))),
+    el("span",{class:"x-pill "+s.state[0]},s.state[1]),el("span",{style:"color:var(--faint);font-size:20px"},"›"));
 }
 
 function finishBetween(t){
-  return db.doc("between/leads/items/"+t.id).update({done:true,doneAt:new Date().toISOString()})
+  return db.doc("between/leads/items/"+t.id).update({done:true,status:"done",doneAt:new Date().toISOString()})
     .then(()=>{const who=leadName(t.by);toast(`Done. ${who} will be notified.`);shareNudge("done",{...t,title:String(t.title||"").replace(/\bme\b/gi,who).replace(/\bmyself\b/gi,who)},"lead")}).catch(writeFail);
 }
 function fromMdPanel(){
   const s=mdSummary();
   const dd=t=>{if(!t.due)return"No due date";const d=daysUntil(t.due);return d<0?"Overdue":d===0?"Due today":d===1?"Due tomorrow":"Due "+(d>6?fmtDate(t.due):DOW[new Date(t.due+"T00:00:00").getDay()])};
   const rows=s.mine.slice(0,2).map(t=>el("div",{class:"x-fm"},el("button",{class:"ck",type:"button","aria-label":"Mark done",title:"Mark done",onclick:()=>finishBetween(t)}),
-    el("span",{},t.title,el("small",{class:t.due&&daysUntil(t.due)<0?"bad":""},dd(t)))));
+    el("span",{class:"tx",role:"button",tabindex:"0",onclick:()=>openBetween(t.id),onkeydown:e=>{if(e.key==="Enter")openBetween(t.id)}},t.title,el("small",{class:t.due&&daysUntil(t.due)<0?"bad":""},[dd(t),stOf(t)!=="todo"?STATUS[stOf(t)]:"",(t.updates||[]).length?`${t.updates.length} update${t.updates.length>1?"s":""}`:""].filter(Boolean).join(" · ")))));
   const open=()=>{view={...view,tab:"between",drill:null,feed:false};render();window.scrollTo(0,0)};
   let adder;
   if(view.fmAdding){
@@ -2470,6 +2492,48 @@ function fromMdPanel(){
   return el("section",{class:"x-panel x-frommd"},
     el("div",{class:"x-fmhd"},el("span",{},s.mine.length?`For you · ${s.mine.length}`:"For you"),el("button",{type:"button",onclick:open},"Open all →")),
     rows.length?rows:el("p",{class:"small muted",style:"margin:0"},`Nothing from ${s.on} right now.`),adder);
+}
+
+/* ---------- a task between Liz and Rishi: status and updates, like a director's task ---------- */
+function stOf(t){return t.done?"done":t.status||"todo"}
+function openBetween(id){
+  document.getElementById("btwModal")?.remove();
+  const prevFocus=document.activeElement;
+  const bg=el("div",{class:"modal-bg",id:"btwModal",onmousedown:e=>{if(e.target===bg)close()}});
+  const close=()=>{bg.remove();document.removeEventListener("keydown",onKey);clearInterval(tick);prevFocus?.focus?.()};
+  const onKey=e=>{if(e.key==="Escape")close()};document.addEventListener("keydown",onKey);
+  const box=el("div",{class:"modal x-btwm",role:"dialog","aria-modal":"true","aria-labelledby":"btwHead"});
+  bg.append(box);document.body.append(bg);
+  let local=null,draft="";
+  const cur=()=>{const live=BETWEEN.find(x=>x.id===id);return local&&(!live||(live.updates||[]).length<(local.updates||[]).length||stOf(live)!==stOf(local))?local:live};
+  async function save(patch,after){const t=cur();local={...t,...patch};draw();
+    try{await db.doc("between/leads/items/"+id).update(patch);after&&after(local)}catch(e){local=null;writeFail(e);draw()}}
+  function draw(){
+    const t=cur();if(!t){close();return}
+    const mineTask=t.to===uid,other=leadName(otherLead()),st=stOf(t);
+    const ta=$("btwNote");if(ta)draft=ta.value;
+    const dueTxt=t.due?(daysUntil(t.due)<0?`Overdue · was due ${fmtDate(t.due)}`:daysUntil(t.due)===0?"Due today":`Due ${fmtDate(t.due)}`):"No due date";
+    const stBtn=(k)=>el("button",{type:"button",class:"x-stb"+(st===k?" on "+k:""),"aria-pressed":st===k,disabled:!mineTask,
+      onclick:()=>{if(st===k)return;if(k==="done")save({status:"done",done:true,doneAt:new Date().toISOString()},x=>{toast(`Done. ${other} will be notified.`);shareNudge("done",{...x,title:String(x.title||"").replace(/\bme\b/gi,other)},"lead")});
+        else save({status:k,done:false,doneAt:null})}},STATUS[k]);
+    const ups=(t.updates||[]).slice().sort((a,b)=>(a.at||"").localeCompare(b.at||""));
+    const note=el("textarea",{id:"btwNote",rows:"2",placeholder:mineTask?"Share progress or a question…":`Comment for ${other}…`},draft);
+    const post=()=>{const v=note.value.trim();if(!v){note.focus();return}draft="";note.value="";const u={by:uid,text:v.slice(0,1000),at:new Date().toISOString()};
+      save({updates:[...(t.updates||[]),u],lastUpdateAt:u.at},()=>toast(`Posted. ${other} will be notified.`))};
+    note.addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey)){e.preventDefault();post()}});
+    box.replaceChildren(...[
+      el("div",{class:"x-btwm-hd"},el("span",{class:"k"},mineTask?`From ${other}`:`For ${other}`),el("button",{class:"btn text",type:"button","aria-label":"Close",onclick:close},"Close")),
+      el("h2",{id:"btwHead"},t.title),
+      el("p",{class:"small "+(t.due&&daysUntil(t.due)<0&&!t.done?"":"muted"),style:t.due&&daysUntil(t.due)<0&&!t.done?"color:var(--bad);margin:0":"margin:0"},dueTxt+(t.createdAt?` · added ${ago(t.createdAt)}`:"")),
+      el("div",{},el("div",{class:"x-lblsm"},"Status"+(mineTask?"":` · ${other} updates this`)),el("div",{class:"x-stg"},["todo","doing","blocked","done"].map(stBtn))),
+      el("div",{},el("div",{class:"x-lblsm"},`Updates · ${ups.length}`),
+        ups.length?el("div",{class:"x-ups"},ups.map(u=>el("div",{class:"x-up"+(u.by===uid?" mine":"")},el("div",{class:"x-upm"},el("b",{},u.by===uid?"You":leadName(u.by)),el("span",{},ago(u.at))),el("div",{},u.text)))):el("p",{class:"small muted",style:"margin:4px 0 0"},"No updates yet.")),
+      el("div",{class:"x-upadd"},note,el("button",{class:"x-btn",type:"button",onclick:post},"Post")),
+      t.by===uid?el("button",{class:"btn text",type:"button",style:"color:var(--bad);justify-self:start",onclick:()=>{if(!confirmDel){confirmDel=true;draw();return}db.doc("between/leads/items/"+id).delete().then(close).catch(writeFail)}},confirmDel?"Tap again to delete":"Delete task"):null].filter(Boolean));
+  }
+  let confirmDel=false;
+  draw();const tick=setInterval(()=>{if(document.activeElement?.id!=="btwNote")draw()},4000);
+  setTimeout(()=>$("btwNote")?.focus(),50);
 }
 </script>
 

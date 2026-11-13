@@ -49,6 +49,13 @@ export default wrap(async (req, res) => {
         // Liz or Rishi finished a task the other one gave them.
         if (seg[0] === "between" && seg.length === 4 && !cur.done && next.done && cur.by && cur.by !== user.id)
           notes.push([[cur.by], { title: `${user.name} finished a task you gave them`, body: short(next.title) }]);
+        if (seg[0] === "between" && seg.length === 4) {
+          const added = (next.updates || []).slice((cur.updates || []).length).filter((u) => u.by === user.id);
+          const other = LEAD_IDS.find((x) => x !== user.id);
+          for (const u of added) if (other) notes.push([[other], { title: `${user.name} posted an update on ${short(next.title, 50)}`, body: short(u.text, 160) }]);
+          if (cur.status !== "blocked" && next.status === "blocked" && cur.by && cur.by !== user.id)
+            notes.push([[cur.by], { title: `${user.name} is blocked on a task`, body: short(next.title) }]);
+        }
       }
       else if (o.op === "delete") {
         await deleteDoc(o.path); out.push({ ok: true });
