@@ -754,6 +754,33 @@ body:has(#wa) .pops{display:none}
 .x-dpet .load{display:flex;align-items:center;gap:10px;font-size:12px}.x-dpet .load .track{flex:1;height:6px;background:var(--bg2);border-radius:99px;overflow:hidden}
 .x-dpet .load .track i{display:block;height:100%;background:var(--brand);border-radius:99px}.x-dpet .load .track i.heavy{background:var(--warn)}.x-dpet .load .track i.over{background:var(--bad)}
 .x-dpfoot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:10px}
+
+.x-thread{display:flex;flex-direction:column;gap:8px;margin:4px 0}
+.x-cm{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:10px 13px;max-width:92%;align-self:flex-start}
+.x-cm.mine{background:#EAF3DE;border-color:#D3E6BD;align-self:flex-end}
+.x-cmhd{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:var(--muted)}
+.x-cm p{margin:4px 0 0;font-size:14px;line-height:1.45;white-space:pre-wrap;color:var(--ink)}
+.x-cmedit{all:unset;cursor:pointer;font-weight:700;color:var(--brand-deep);font-size:12px}
+.x-cmbar{justify-content:flex-end}
+.x-cmm{padding:22px 24px;gap:14px;width:min(560px,100%)}
+.x-cmm h2{margin:0;font:800 21px/1.2 var(--display);letter-spacing:-.02em}
+.x-cmm textarea{width:100%;box-sizing:border-box;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;font:inherit;font-size:15px;line-height:1.5;resize:vertical;min-height:130px;background:#fff;color:var(--ink)}
+.x-cmm textarea:focus{outline:none;border-color:var(--brand)}
+@media (max-width:900px){.x-kbd{visibility:hidden}}
+.x-cmfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+.x-nb{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;box-sizing:border-box;border-radius:99px;background:var(--bad);color:#fff;font:700 11.5px/1 var(--body);margin-left:8px;vertical-align:2px}
+.x-nb.big{margin:0;min-width:24px;height:24px;font-size:13px}
+.x-newcm{border:1.5px solid #F2C9C3;background:#FFF8F6;gap:8px}
+.x-newhd{display:flex;align-items:center;gap:10px}.x-newhd b{font:800 17px var(--display)}.x-newhd .muted{margin-left:auto}
+.x-newrow{all:unset;cursor:pointer;display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.x-newrow:hover{border-color:#E8A79C}
+.x-newrow .x-nb{margin:0;flex:none}
+.x-newrow .tx{flex:1;min-width:0;display:grid;gap:2px}.x-newrow .tx b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.x-newrow .tx span{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.x-newrow .go{font-size:13px;font-weight:700;color:var(--brand-deep);flex:none}
+.x-cm.fresh{border-color:#E8A79C;background:#FFF4F1;box-shadow:0 0 0 3px rgb(232 167 156 / .25)}
+.x-newtag{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--bad);color:#fff;border-radius:6px;padding:2px 7px}
 </style>
 
 </head>
@@ -1362,7 +1389,7 @@ function checkNudges(){
       el("button",{class:"btn text",type:"button","aria-label":"Dismiss",onclick:()=>card.remove()},"✕"),
       el("div",{class:"row",style:"grid-column:1/-1;justify-content:flex-end"},
         el("button",{class:"btn text",type:"button",onclick:()=>card.remove()},"Later"),
-        el("button",{class:"btn",type:"button",onclick:()=>{card.remove();open.add(it.id);render();document.getElementById("it-"+it.id)?.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>$("tx-"+it.id)?.focus({preventScroll:true}),400)}},"Add update"),
+        el("button",{class:"btn",type:"button",onclick:()=>{card.remove();open.add(it.id);render();document.getElementById("it-"+it.id)?.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>openComment(it,uid,false,null),400)}},"Add update"),
         el("button",{class:"btn primary",type:"button",onclick:()=>{card.remove();setStatus(it,uid,false,"done")}},"Mark done")));
     $("pops").prepend(card);
     setTimeout(()=>card.remove(),20000);
@@ -2293,6 +2320,10 @@ renderDrill=function(k){
 const _itemRow=itemRow;
 itemRow=function(it,laneUid,lead){
   const r=_itemRow(it,laneUid,lead);
+  try{restyleThread(r,it,laneUid,lead)}catch(e){console.error(e)}
+  try{const un=unreadOf(it,lead),n=un.length;
+    if(open.has(it.id)){if(n){FRESH[it.id]=new Set([...(FRESH[it.id]||[]),...un.map(u=>u.at)]);markSeen(it,laneUid)}}else delete FRESH[it.id];
+    if(n&&!open.has(it.id)){const tt=r.querySelector(".ititle");tt&&tt.append(el("span",{class:"x-nb",title:`${n} new comment${n>1?"s":""}`},String(n)))}}catch(e){}
   if(lead&&isLead&&open.has(it.id)&&!it._pending&&laneUid!=="_leads"){
     const b=el("button",{class:"btn",type:"button",onclick:async()=>{const now=new Date().toISOString();try{await db.doc(`lanes/${laneUid}/items/${it.id}`).update({updates:[...(it.updates||[]),{by:uid,side:"lead",at:now,text:"👏 Kudos!",kudos:true}],lastUpdateAt:now});toast("Kudos sent")}catch(e){writeFail(e)}}},"👏 Send kudos");
     r.querySelector(".ibody .row")?.prepend(b);
@@ -2574,6 +2605,118 @@ function openBetween(id){
   let confirmDel=false;
   draw();const tick=setInterval(()=>{if(document.activeElement?.id!=="btwNote")draw()},4000);
   setTimeout(()=>$("btwNote")?.focus(),50);
+}
+
+/* ---------- comments on a task: a thread you can edit and delete from, written in a pop-up ---------- */
+const FRESH={};
+function isMyUpd(u,lead){return u.by?u.by===uid:(u.side==="lead")===!!lead}
+function updWho(u,laneUid,lead){
+  if(isMyUpd(u,lead))return"You";
+  if(u.side==="lead")return u.by?leadName(u.by):"Leadership";
+  return first(laneName(laneUid))||"Director";
+}
+function restyleThread(r,it,laneUid,lead){
+  const oldT=r.querySelector(".thread"),oldC=r.querySelector(".compose");
+  if(!oldC)return;
+  const ups=(it.updates||[]).map((u,i)=>({u,i}));
+  const list=ups.filter(({u})=>u.text&&!u.kudos||u.status||u.kudos);
+  const thread=el("div",{class:"x-thread"},...list.map(({u,i})=>{
+    const mine=isMyUpd(u,lead);
+    const meta=[updWho(u,laneUid,lead),fmtWhen(u.at),u.status?"marked "+STATUS[u.status].toLowerCase():"",u.editedAt?"edited":""].filter(Boolean).join(" · ");
+    const fresh=!mine&&(FRESH[it.id]?.has(u.at)||unreadOf(it,lead).some(x=>x.at===u.at));
+    return el("div",{class:"x-cm"+(mine?" mine":"")+(u.side==="lead"?" lead":"")+(fresh?" fresh":"")},
+      el("div",{class:"x-cmhd"},el("span",{},meta),fresh?el("span",{class:"x-newtag"},"New"):mine&&u.text&&!u.kudos?el("button",{type:"button",class:"x-cmedit",onclick:()=>openComment(it,laneUid,lead,i)},"Edit"):null),
+      u.text?el("p",{},u.text):null);
+  }));
+  const addBtn=el("button",{class:"btn primary",type:"button",onclick:()=>openComment(it,laneUid,lead,null)},lead?"Add a comment":"Add an update");
+  const wa=oldC.querySelector(".btn.text");
+  const bar=el("div",{class:"row x-cmbar"},wa||null,addBtn);
+  if(oldT)oldT.replaceWith(thread);else oldC.before(thread);
+  if(!list.length)thread.remove();
+  oldC.replaceWith(bar);
+}
+function openComment(it,laneUid,lead,idx){
+  document.getElementById("cmModal")?.remove();
+  const editing=idx!==null&&idx!==undefined,orig=editing?(it.updates||[])[idx]:null;
+  const prevFocus=document.activeElement;
+  const bg=el("div",{class:"modal-bg",id:"cmModal",onmousedown:e=>{if(e.target===bg)close()}});
+  const close=()=>{bg.remove();document.removeEventListener("keydown",onKey);prevFocus?.focus?.()};
+  const onKey=e=>{if(e.key==="Escape")close()};document.addEventListener("keydown",onKey);
+  const ref=db.doc(`lanes/${laneUid}/items/${it.id}`);
+  const ta=el("textarea",{id:"cmText",rows:"5",maxlength:"1000",placeholder:lead?`What should ${first(laneName(laneUid))||"they"} know?`:"Where things stand, what's next, or a question for leadership"},orig?orig.text:"");
+  const count=el("span",{class:"small muted"},"");
+  const upd=()=>{count.textContent=`${ta.value.length}/1000`;save.disabled=!ta.value.trim()||(editing&&ta.value.trim()===orig.text)};
+  ta.addEventListener("input",upd);
+  ta.addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey)){e.preventDefault();if(!save.disabled)save.click()}});
+  const fresh=()=>(items[laneUid]||[]).find(x=>x.id===it.id)||it;
+  const save=el("button",{class:"x-btn",type:"button",onclick:async()=>{
+    const v=ta.value.trim();if(!v)return;save.disabled=true;
+    try{
+      const cur=fresh(),now=new Date().toISOString();let list=(cur.updates||[]).slice();
+      if(editing){const j=list.findIndex(u=>u.at===orig.at&&isMyUpd(u,lead));if(j<0)throw new Error("That comment changed. Close and try again.");list[j]={...list[j],text:v.slice(0,1000),editedAt:now};await ref.update({updates:list})}
+      else{if(lead)await ref.update({updates:[...list,{by:uid,side:"lead",at:now,text:v.slice(0,1000)}],lastUpdateAt:now});else await setStatus(cur,laneUid,lead,cur.status,v.slice(0,1000))}
+      toast(editing?"Comment updated":lead?"Comment posted. They'll get a notification.":"Update posted");close();
+    }catch(e){save.disabled=false;e.message&&!e.code?toast(e.message):writeFail(e)}}},editing?"Save changes":"Post");
+  let armed=false;
+  const del=editing?el("button",{class:"btn text danger",type:"button",onclick:async()=>{
+    if(!armed){armed=true;del.textContent="Tap again to delete";setTimeout(()=>{if(del.isConnected){armed=false;del.textContent="Delete comment"}},3500);return}
+    try{const cur=fresh();await ref.update({updates:(cur.updates||[]).filter(u=>!(u.at===orig.at&&isMyUpd(u,lead)))});toast("Comment deleted");close()}catch(e){writeFail(e)}}},"Delete comment"):null;
+  const box=el("div",{class:"modal x-cmm",role:"dialog","aria-modal":"true","aria-labelledby":"cmHead"},
+    el("div",{class:"x-btwm-hd"},el("span",{class:"k"},editing?"Edit comment":lead?"New comment":"New update"),el("button",{class:"btn text",type:"button",onclick:close},"Cancel")),
+    el("h2",{id:"cmHead"},it.title),
+    ta,
+    el("div",{class:"x-cmfoot"},del||el("span",{class:"small muted x-kbd"},"Ctrl/⌘ + Enter to post"),el("div",{class:"row",style:"align-items:center;gap:12px"},count,save)));
+  bg.append(box);document.body.append(bg);upd();setTimeout(()=>{ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)},40);
+}
+
+/* ---------- new-comment badges and the "New comments" pane ---------- */
+function unreadOf(it,lead){const seen=(it.seenBy||{})[uid]||"";return (it.updates||[]).filter(u=>u.text&&!u.kudos&&!isMyUpd(u,lead)&&(u.at||"")>seen)}
+const seenWrites=new Set();
+function markSeen(it,laneUid){
+  const key=it.id+(it.updates||[]).length;if(seenWrites.has(key)||it._pending)return;seenWrites.add(key);
+  setTimeout(()=>db.doc(`lanes/${laneUid}/items/${it.id}`).update({seenBy:{...(it.seenBy||{}),[uid]:new Date().toISOString()}}).catch(()=>{}),1500);
+}
+function newCommentsPane(list,lead){
+  const rows=(list||[]).filter(i=>!i._pending).map(i=>[i,unreadOf(i,lead)]).filter(([,u])=>u.length).sort((a,b)=>b[1].slice(-1)[0].at.localeCompare(a[1].slice(-1)[0].at));
+  if(!rows.length)return null;
+  const total=rows.reduce((s,[,u])=>s+u.length,0);
+  return el("section",{class:"x-panel x-newcm"},
+    el("div",{class:"x-newhd"},el("span",{class:"x-nb big"},String(total)),el("b",{},total>1?"New comments":"New comment"),el("span",{class:"small muted"},"Tap to read")),
+    ...rows.slice(0,4).map(([it,us])=>{const last=us[us.length-1],lane=it._lane||uid;
+      const who=last.side==="lead"?(last.by?leadName(last.by):"Leadership"):first(laneName(lane))||"Director";
+      return el("button",{class:"x-newrow",type:"button",onclick:()=>openThread(it,lane,lead)},
+        el("span",{class:"x-nb"},String(us.length)),
+        el("span",{class:"tx"},el("b",{},it.title),el("span",{},`${who}: ${last.text}`)),
+        el("span",{class:"go"},"Read ›"));}),
+    rows.length>4?el("p",{class:"small muted",style:"margin:0"},`+${rows.length-4} more`):null);
+}
+function openThread(it0,laneUid,lead){
+  document.getElementById("thModal")?.remove();
+  const live=()=>(items[laneUid]||[]).find(x=>x.id===it0.id)||it0;
+  const it=live(),newOnes=new Set(unreadOf(it,lead).map(u=>u.at));
+  const prevFocus=document.activeElement;
+  const bg=el("div",{class:"modal-bg",id:"thModal",onmousedown:e=>{if(e.target===bg)close()}});
+  const close=()=>{bg.remove();document.removeEventListener("keydown",onKey);clearInterval(tick);prevFocus?.focus?.()};
+  const onKey=e=>{if(e.key==="Escape")close()};document.addEventListener("keydown",onKey);
+  const box=el("div",{class:"modal x-cmm",role:"dialog","aria-modal":"true","aria-labelledby":"thHead"});
+  function draw(){
+    const t=live(),ups=(t.updates||[]).filter(u=>u.text||u.status);
+    const dueTxt=t.due?(daysUntil(t.due)<0?`Overdue · was due ${fmtDate(t.due)}`:daysUntil(t.due)===0?"Due today":`Due ${fmtDate(t.due)}`):"No due date";
+    box.replaceChildren(
+      el("div",{class:"x-btwm-hd"},el("span",{class:"k"},`Comments · ${STATUS[t.status]||""}`),el("button",{class:"btn text",type:"button",onclick:close},"Close")),
+      el("h2",{id:"thHead"},t.title),el("p",{class:"small muted",style:"margin:-6px 0 0"},dueTxt),
+      el("div",{class:"x-thread",style:"max-height:46vh;overflow:auto"},...ups.map((u,i)=>{const mine=isMyUpd(u,lead),fresh=newOnes.has(u.at);
+        return el("div",{class:"x-cm"+(mine?" mine":"")+(fresh?" fresh":"")},
+          el("div",{class:"x-cmhd"},el("span",{},[updWho(u,laneUid,lead),fmtWhen(u.at),u.status?"marked "+STATUS[u.status].toLowerCase():"",u.editedAt?"edited":""].filter(Boolean).join(" · ")),
+            fresh?el("span",{class:"x-newtag"},"New"):mine&&u.text&&!u.kudos?el("button",{type:"button",class:"x-cmedit",onclick:()=>{close();openComment(t,laneUid,lead,(t.updates||[]).indexOf(u))}},"Edit"):null),
+          u.text?el("p",{},u.text):null)})),
+      el("div",{class:"x-cmfoot"},el("button",{class:"btn text",type:"button",onclick:()=>{close();open.add(t.id);if(isMobile()&&!lead){view.mtab="list";view.mseg="week"}render();setTimeout(()=>document.getElementById("it-"+t.id)?.scrollIntoView({behavior:"smooth",block:"center"}),120)}},"Open task"),
+        el("button",{class:"x-btn",type:"button",onclick:()=>{close();openComment(t,laneUid,lead,null)}},lead?"Reply":"Reply or update")));
+    const th=box.querySelector(".x-thread");if(th)th.scrollTop=th.scrollHeight;
+  }
+  bg.append(box);document.body.append(bg);draw();
+  if(newOnes.size)markSeen(it,laneUid);
+  const tick=setInterval(draw,4000);
 }
 </script>
 

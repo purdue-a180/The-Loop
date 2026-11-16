@@ -6,7 +6,7 @@ import { SignJWT, jwtVerify } from "jose";
 const mem = new Map();
 const memStore = {
   async get(k) { return mem.has(k) ? JSON.parse(mem.get(k)) : null; },
-  async set(k, v) { mem.set(k, JSON.stringify(v)); return "OK"; },
+  async set(k, v, o) { if (o && o.nx && mem.has(k)) return null; mem.set(k, JSON.stringify(v)); return "OK"; },
   async del(...ks) { ks.forEach((k) => mem.delete(k)); return ks.length; },
   async mget(...ks) { return ks.map((k) => (mem.has(k) ? JSON.parse(mem.get(k)) : null)); },
   async sadd(k, ...m) { const s = new Set((await this.get(k)) || []); m.forEach((x) => s.add(x)); mem.set(k, JSON.stringify([...s])); return m.length; },
@@ -38,6 +38,7 @@ const PEOPLE = [
   { id: "alex", name: "Alex", fullName: "Alex Okano", last: "okano", aliases: ["alex"], role: "director", lane: "marketing" },
   { id: "liya", name: "Liya", fullName: "Liya Abil", last: "abil", aliases: ["liya"], role: "director", lane: "ops" },
 ];
+export const ALL_IDS = PEOPLE.map((p) => p.id);
 export const LEAD_IDS = PEOPLE.filter((p) => p.role === "lead").map((p) => p.id);
 export const starterPassword = (u) => `${u.last}123`;
 

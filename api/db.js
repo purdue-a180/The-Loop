@@ -37,12 +37,20 @@ export default wrap(async (req, res) => {
         const cur = await readDoc(o.path);
         if (!cur) { out.push({ error: "invalid_argument" }); continue; }
         const next = { ...cur, ...(o.data || {}) };
+        // Comments can be edited or deleted only by the person who wrote them.
+        if ((seg[0] === "lanes" || seg[0] === "between") && Array.isArray(cur.updates) && o.data && "updates" in o.data) {
+          const keep = new Set((next.updates || []).map((u) => JSON.stringify(u)));
+          const mine = (u) => u.by ? u.by === user.id : (u.side === "lead") === lead;
+          if (cur.updates.some((u) => !keep.has(JSON.stringify(u)) && !mine(u))) { out.push({ error: "permission_denied" }); continue; }
+        }
         await writeDoc(o.path, next); out.push({ ok: true });
         // A lead commented or gave kudos on a director's task.
         if (seg[0] === "lanes" && seg[2] === "items" && seg.length === 4) {
           const before = (cur.updates || []).length, added = (next.updates || []).slice(before);
           for (const u of added) if (lead && u.side === "lead" && seg[1] !== user.id)
             notes.push([[seg[1]], u.kudos ? { title: `${user.name} gave you kudos`, body: short(next.title) } : { title: `${user.name} commented on ${short(next.title, 50)}`, body: short(u.text, 160) }]);
+          for (const u of added) if (!lead && u.side === "dir" && u.text)
+            notes.push([LEAD_IDS, { title: `${user.name} commented on ${short(next.title, 50)}`, body: short(u.text, 160) }]);
           if (!lead && cur.status !== "done" && next.status === "done")
             notes.push([LEAD_IDS, { title: `${user.name} finished a task`, body: short(next.title) }]);
         }
@@ -64,6 +72,8 @@ export default wrap(async (req, res) => {
         const id = (o.id && /^[A-Za-z0-9_-]{6,40}$/.test(o.id)) ? o.id : Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
         await writeDoc(`${o.path}/${id}`, o.data || {}); out.push({ ok: true, id });
         const d = o.data || {};
+        if (seg[0] === "lanes" && seg[2] === "items" && !lead && seg[1] === user.id)
+          notes.push([LEAD_IDS, { title: `${user.name} added a task`, body: short(d.title) }]);
         if (seg[0] === "lanes" && seg[2] === "items" && lead && seg[1] !== user.id)
           notes.push([[seg[1]], { title: `${user.name} assigned you a task`, body: short(d.title) }]);
         if (seg[0] === "lanes" && seg[2] === "msgs") {
