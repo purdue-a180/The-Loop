@@ -1,4 +1,14 @@
 {
   "functions": { "api/ai.js": { "maxDuration": 60 }, "api/remind.js": { "maxDuration": 60 } },
+  "rewrites": [
+    { "source": "/api/logout", "destination": "/api/x?route=logout" },
+    { "source": "/api/me", "destination": "/api/x?route=me" },
+    { "source": "/api/password", "destination": "/api/x?route=password" },
+    { "source": "/api/reset-password", "destination": "/api/x?route=reset-password" },
+    { "source": "/api/people", "destination": "/api/x?route=people" },
+    { "source": "/api/reset-board", "destination": "/api/x?route=reset-board" },
+    { "source": "/api/push", "destination": "/api/x?route=push" },
+    { "source": "/api/calendar-link", "destination": "/api/x?route=calendar-link" }
+  ],
   "crons": [{ "path": "/api/remind", "schedule": "0 14 * * *" }]
 }

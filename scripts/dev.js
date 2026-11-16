@@ -8,6 +8,9 @@ const types = { ".html": "text/html; charset=utf-8", ".png": "image/png", ".js":
 http.createServer(async (req, res) => {
   const url = new URL(req.url, "http://x");
   if (url.pathname.startsWith("/api/")) {
+    // follow the same rewrites Vercel uses
+    try { const vc = JSON.parse(fs.readFileSync(path.join(root, "vercel.json"), "utf8"));
+      for (const r of vc.rewrites || []) if (r.source === url.pathname) { const d = new URL(r.destination, "http://x"); d.searchParams.forEach((v, k) => url.searchParams.set(k, v)); url.pathname = d.pathname; req.query = Object.fromEntries(url.searchParams); break; } } catch {}
     const file = path.join(root, "api", url.pathname.slice(5) + ".js");
     if (!fs.existsSync(file)) { res.writeHead(404); return res.end(); }
     let raw = ""; for await (const c of req) raw += c;
