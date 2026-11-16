@@ -1,0 +1,8 @@
+api/calendar-link.js
+api/logout.js
+api/me.js
+api/password.js
+api/people.js
+api/push.js
+api/reset-board.js
+api/reset-password.js
