@@ -811,6 +811,19 @@ body:has(#wa) .pops{display:none}
   .x-edit input{min-width:0;width:100%;box-sizing:border-box}
   .x-dphd h1{word-break:break-word}
 }
+
+.x-wa{gap:10px!important;max-height:calc(100vh - 40px);overflow:auto}
+.x-wastep{display:flex;align-items:center;gap:8px;margin-top:4px}.x-wastep b{font-size:14px}
+.x-wanum{width:20px;height:20px;border-radius:99px;background:var(--deep);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800}
+.x-wadet{display:grid;gap:8px}
+.x-wadet textarea,.x-wa #waText{width:100%;box-sizing:border-box;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;font-size:14.5px;line-height:1.45;resize:vertical;background:#fff;color:var(--ink)}
+.x-wadet textarea:focus,.x-wa #waText:focus{outline:none;border-color:var(--brand)}
+.x-wamic{display:flex;align-items:center;gap:10px}.x-wamic .x-btn{margin-left:auto;padding:8px 14px;font-size:13.5px}
+.x-mic{all:unset;cursor:pointer;width:38px;height:38px;border-radius:99px;background:var(--bg2);border:1.5px solid var(--line);display:grid;place-items:center;flex:none}
+.x-mic svg{width:18px;height:18px;fill:none;stroke:var(--brand-deep);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.x-mic.on{background:var(--bad);border-color:var(--bad);animation:micp 1.2s ease-in-out infinite}.x-mic.on svg{stroke:#fff}
+@keyframes micp{50%{box-shadow:0 0 0 7px rgb(200 70 60 / .18)}}
+@media (prefers-reduced-motion:reduce){.x-mic.on{animation:none}}
 </style>
 
 </head>
@@ -1265,26 +1278,47 @@ function draftMessage(kind,it,role,v){
 function shareNudge(kind,it,role){
   if(!role||store("waOff")==="1")return;
   document.getElementById("wa")?.remove();
-  let ver=0;const ta=el("textarea",{id:"waText",rows:"3","aria-label":"Message, edit before sending"},draftMessage(kind,it,role,0));
+  const roleTitle=role==="lead"?(uid==="rishi"?"Senior Vice President":"Managing Director"):(roster[role]?.title||"director");
+  let ver=0;
+  const ta=el("textarea",{id:"waText",rows:"4","aria-label":"Message, edit before sending"},draftMessage(kind,it,role==="lead"?null:role,0));
   const send=el("a",{class:"btn wabtn",target:"_blank",rel:"noopener",href:"#",onclick:()=>setTimeout(()=>sheet.remove(),400)},"Send on WhatsApp");
   const sync=()=>send.href="https://wa.me/?text="+encodeURIComponent(ta.value);sync();ta.addEventListener("input",sync);
   const copy=el("button",{class:"btn",type:"button",onclick:async()=>{try{await navigator.clipboard.writeText(ta.value);copy.textContent="Copied"}catch(e){ta.select()}}},"Copy");
-  const again=el("button",{class:"btn text",type:"button",onclick:()=>{ta.value=draftMessage(kind,it,role,++ver);sync()}},"Another version");
-  const ai=sample?el("button",{class:"btn text",type:"button",onclick:async()=>{
+  const again=el("button",{class:"btn text",type:"button",onclick:()=>{ta.value=draftMessage(kind,it,role==="lead"?null:role,++ver);sync()}},"Simple version");
+  // details: typed or spoken
+  const det=el("textarea",{id:"waDet",rows:"3",placeholder:kind==="done"?"What did you do? Results, numbers, links, who helped, what's next…":"What's going on and what do you need?"});
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let rec=null,base="";
+  const mic=el("button",{class:"x-mic",type:"button","aria-label":"Speak your details",title:"Speak your details",html:'<svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',onclick:()=>{
+    if(!SR){toast("Use the microphone on your keyboard to dictate.");det.focus();return}
+    if(rec){rec.stop();return}
+    rec=new SR();rec.lang="en-US";rec.continuous=true;rec.interimResults=true;base=det.value?det.value.replace(/\s*$/," "):"";
+    rec.onresult=e=>{let fin="",tmp="";for(const r of e.results)(r.isFinal?(fin+=r[0].transcript):(tmp+=r[0].transcript));det.value=base+fin+tmp};
+    rec.onend=()=>{rec=null;mic.classList.remove("on");lab.textContent="Tap the mic to talk"};
+    rec.onerror=e=>{toast(e.error==="not-allowed"?"Microphone access was blocked. Allow it in your settings, or type instead.":"Couldn't hear that. Try again or type it.")};
+    try{rec.start();mic.classList.add("on");lab.textContent="Listening… tap to stop"}catch(e){rec=null;toast("Couldn't start the microphone")}}});
+  const lab=el("span",{class:"small muted"},SR?"Tap the mic to talk":"Tip: use your keyboard's mic to dictate");
+  const ai=el("button",{class:"x-btn",type:"button",onclick:async()=>{
+      if(rec)rec.stop();
+      const extra=det.value.trim();
       ai.textContent="Writing…";ai.disabled=true;
-      try{const name=first(myLane?.name||myProfileName);
-        const {text}=await sample(`Write a WhatsApp message that ${name||"a director"}, ${roster[role].title} at 180 Degrees Consulting Purdue, will post in the exec board group chat.
-Event: ${kind==="done"?"they just completed":kind==="blocked"?"they are blocked on":"they just added"} the task "${it.title}"${it.due?` (due ${fmtDate(it.due)})`:""}.${lastComment(it)?` Their latest note: "${lastComment(it)}".`:""}
-Write in first person as them, as a short, natural, conversational group message (one or two sentences, friendly but professional). Do not mention their name, title, due dates or notes, do not ask whether anything else is needed, and do not put the task in quotation marks. Do not use any emojis or slang. Reply with only the message.`,{modelTier:"quick",cache:false});
-        ta.value=text.trim().replace(/^"|"$/g,"");sync();
-      }catch(e){toast(e?.code==="not_granted"?"Claude access was declined":"Couldn't rewrite it right now")}
-      ai.textContent="Write it with Claude";ai.disabled=false}},"Write it with Claude"):null;
-  const sheet=el("div",{class:"wa",id:"wa",role:"dialog","aria-label":"Share to WhatsApp"},
+      try{const name=role==="lead"?leadName(uid):first(myLane?.name||myProfileName);
+        const notes=[it.note?`Task note: ${it.note}`:"",...(it.updates||[]).filter(u=>u.text&&!u.kudos).slice(-4).map(u=>`${u.side==="lead"?"Leadership":"Their"} comment: ${u.text}`)].filter(Boolean).join("\n");
+        const {text}=await sample(`Write a WhatsApp message that ${name||"a director"}, ${roleTitle} at 180 Degrees Consulting Purdue, will post in the exec board group chat.
+What happened: ${kind==="done"?"they just finished":kind==="blocked"?"they are stuck on":"they just took on"} the task: ${it.title}.
+${extra?`In their own words, here is what they want people to know:\n${extra}\n`:""}${notes?`Background from the task (use only if it helps):\n${notes}\n`:""}
+Write it in first person as them. Make it descriptive: cover what was done, the concrete details, results or numbers they gave, and any next step or ask, in 2 to 5 natural sentences. Keep it friendly, clear and professional, like a real message to teammates. Only use facts given above; never invent numbers, names or links. Do not start with their name or title, do not put the task in quotation marks, and do not use emojis, hashtags or slang. Reply with only the message.`,{modelTier:"quick",cache:false});
+        ta.value=text.trim().replace(/^"|"$/g,"");sync();ta.style.height="auto";ta.style.height=Math.min(ta.scrollHeight+4,320)+"px";ta.focus();toast("Here's your message. Edit anything before sending.");
+      }catch(e){toast(e?.code==="sampling_disabled"?"Claude isn't set up yet. Ask Rishi to add the API key.":e?.code==="not_granted"?"Claude access was declined":"Couldn't write it right now. You can still edit and send.")}
+      ai.textContent="Write my message";ai.disabled=false}},"Write my message");
+  const sheet=el("div",{class:"wa x-wa",id:"wa",role:"dialog","aria-label":"Share to WhatsApp"},
     el("div",{class:"spread"},el("strong",{},kind==="done"?"Share this update with the exec chat?":kind==="blocked"?"Ask the exec chat for help?":"Let the exec chat know?"),
-      el("button",{class:"btn text",type:"button","aria-label":"Close",onclick:()=>sheet.remove()},"✕")),
-    el("p",{class:"small muted",style:"margin:0"},"Tap the message to edit it before sending."),ta,
-    el("div",{class:"row small",style:"gap:12px"},again,ai,
-      el("button",{class:"btn text",type:"button",style:"margin-left:auto",onclick:()=>{store("waOff","1");sheet.remove();render();toast("WhatsApp prompts off. Turn them back on below your list.")}},"Don't ask again")),
+      el("button",{class:"btn text",type:"button","aria-label":"Close",onclick:()=>{if(rec)rec.stop();sheet.remove()}},"✕")),
+    el("div",{class:"x-wastep"},el("span",{class:"x-wanum"},"1"),el("b",{},"Add details"),el("span",{class:"small muted"},"optional")),
+    el("div",{class:"x-wadet"},det,el("div",{class:"x-wamic"},mic,lab,sample?ai:null)),
+    el("div",{class:"x-wastep"},el("span",{class:"x-wanum"},"2"),el("b",{},"Your message"),el("span",{class:"small muted"},"tap to edit")),
+    ta,
+    el("div",{class:"row small",style:"gap:12px"},again,
+      el("button",{class:"btn text",type:"button",style:"margin-left:auto",onclick:()=>{store("waOff","1");if(rec)rec.stop();sheet.remove();render();toast("WhatsApp prompts off. Turn them back on below your list.")}},"Don't ask again")),
     el("div",{class:"row",style:"justify-content:flex-end"},copy,send));
   document.body.append(sheet);$("toast").hidden=true;
 }
